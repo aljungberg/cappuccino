@@ -166,7 +166,7 @@
         result = [CPArray array],
         i;
     
-    for (i = 0;i < count;i++)
+    for (i = 0; i < count; i++)
     {
         var object = [self objectAtIndex:i];
         
@@ -181,7 +181,7 @@
 {
     var count = [self count];
     
-    while (--count >= 0)
+    while (count--)
     {
         var check = [self objectAtIndex:count];
         
