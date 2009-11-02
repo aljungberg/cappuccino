@@ -103,9 +103,10 @@ var CPCompoundPredicateType;
 - (CPPredicate)predicateWithSubstitutionVariables:(CPDictionary)variables
 {
     var subp = [CPArray array],
+        count = [subp count];
         i;
         
-    for (i =0; i < [subp count]; i++)
+    for (i = 0; i < count; i++)
     {
         var p = [subp objectAtIndex:i];
         var sp = [p predicateWithSubstitutionVariables:variables];
@@ -122,7 +123,7 @@ var CPCompoundPredicateType;
         count = [_predicates count],
         i;
     
-    if(count == 0)
+    if (count == 0)
     	return @"TRUPREDICATE";
     
     for (i = 0; i < count; i++)
@@ -144,12 +145,14 @@ var CPCompoundPredicateType;
             break;     
         case CPAndPredicateType:
             result += [args objectAtIndex:0];
-            for (var j = 1; j < [args count]; j++)
+            var count = [args count];
+            for (var j = 1; j < count; j++)
                 result += " AND " + [args objectAtIndex:j];
             break;
         case CPOrPredicateType:
-            result += [args objectAtIndex:0];    
-            for(var j=1;j<[args count];j++)
+            result += [args objectAtIndex:0];
+            var count = [args count];
+            for (var j = 1; j < count; j++)
                 result += " OR " + [args objectAtIndex:j];
             break;
     }   
@@ -171,7 +174,7 @@ var CPCompoundPredicateType;
     if (count == 0)
         return YES;
     
-    for (i = 0;i < count;i++)
+    for (i = 0; i < count; i++)
     {
         var predicate = [_predicates objectAtIndex:i];
     

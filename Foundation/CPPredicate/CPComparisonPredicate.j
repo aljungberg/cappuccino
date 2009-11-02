@@ -510,7 +510,7 @@ var CPPredicateOperatorType;
     var left = _left,
         right = _right;
         
-    if(variables != nil)
+    if (variables != nil)
     {
         left = [left _expressionWithSubstitutionVariables:variables];
         right = [right _expressionWithSubstitutionVariables:variables];
