@@ -23,6 +23,7 @@
 @import "CPFont.j"
 @import "CPShadow.j"
 @import "CPView.j"
+@import "CPKeyValueBinding.j"
 
 #include "CoreGraphics/CGGeometry.h"
 #include "Platform/Platform.h"
@@ -131,6 +132,11 @@ var CPControlBlackColor     = [CPColor blackColor];
                                                 @"max-size"]];
 }
 
++ (void)initialize
+{
+    [self exposeBinding:"value"];
+}
+
 - (id)initWithFrame:(CGRect)aFrame
 {
     self = [super initWithFrame:aFrame];
@@ -185,6 +191,11 @@ var CPControlBlackColor     = [CPColor blackColor];
 */
 - (void)sendAction:(SEL)anAction to:(id)anObject
 {
+    var theBinding = [CPKeyValueBinding getBinding:CPValueBinding forObject:self];
+
+    if (theBinding)
+        [theBinding reverseSetValueFor:@"objectValue"];
+
     [CPApp sendAction:anAction to:anObject from:self];
 }
 
@@ -562,6 +573,14 @@ BRIDGE(ImageScaling, imageScaling, "image-scaling")
 - (BOOL)isHighlighted
 {
     return [self hasThemeState:CPThemeStateHighlighted];
+}
+
+- (id)_replacementKeyPathForBinding:(CPString)binding
+{
+    if ([binding isEqual:@"value"])
+        return @"objectValue";
+
+    return binding;
 }
 
 @end

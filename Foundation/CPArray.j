@@ -321,7 +321,7 @@
 */
 - (int)indexOfObject:(id)anObject inRange:(CPRange)aRange
 {
-    if (anObject === nil)
+    if (anObject === nil || anObject === undefined)
         return CPNotFound;
     
     var i = aRange.location, 
@@ -454,6 +454,12 @@
 */
 - (unsigned)indexOfObject:(id)anObject sortedByFunction:(Function)aFunction context:(id)aContext
 {
+    var result = [self _indexOfObject:anObject sortedByFunction:aFunction context:aContext];
+    return result >= 0 ? result : CPNotFound;
+}
+
+- (unsigned)_indexOfObject:(id)anObject sortedByFunction:(Function)aFunction context:(id)aContext
+{
     if (!aFunction || anObject === undefined)
         return CPNotFound;
 
@@ -476,7 +482,7 @@
         }
     }
 
-    return CPNotFound;
+    return -mid-1;
 }
 
 /*!
@@ -501,6 +507,27 @@
 
         return result;
     }];
+}
+
+- (unsigned)insertObject:(id)anObject inArraySortedByDescriptors:(CPArray)descriptors
+{
+    var index = [self _insertObject:anObject sortedByFunction:function(lhs, rhs)
+    {
+        var i = 0,
+            count = [descriptors count],
+            result = CPOrderedSame;
+
+        while (i < count)
+            if((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
+                return result;
+
+        return result;
+    } context:nil];
+
+    if (index < 0)
+        index = -result-1;
+
+    [self insertObject:anObject atIndex:index];
 }
 
 /*!
