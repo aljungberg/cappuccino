@@ -155,6 +155,35 @@
     }
 }
 
+- (void)testInsertObjectInArraySortedByDescriptors
+{
+    descriptors = [[[CPSortDescriptor alloc] initWithKey:@"intValue" ascending:YES]];
+    var array = [1, 3, 5];
+
+    [array insertObject: 0 inArraySortedByDescriptors:descriptors];
+    [self assert:[0, 1, 3, 5] equals:array];    
+
+    array = [1, 3, 5];
+    [array insertObject: 2 inArraySortedByDescriptors:descriptors];
+    [self assert:[1, 2, 3, 5] equals:array];    
+
+    array = [1, 3, 5];
+    [array insertObject: 1 inArraySortedByDescriptors:descriptors];
+    [self assert:[1, 1, 3, 5] equals:array];    
+
+    array = [1, 3, 5];
+    [array insertObject: 6 inArraySortedByDescriptors:descriptors];
+    [self assert:[1, 3, 5, 6] equals:array];    
+
+    array = [1, 3, 5];
+    [array insertObject: 3 inArraySortedByDescriptors:descriptors];
+    [self assert:[1, 3, 3, 5] equals:array];    
+
+    array = [];
+    [array insertObject: 3 inArraySortedByDescriptors:descriptors];
+    [self assert:[3] equals:array];
+}
+
 @end
 
 @implementation CPArray (reverse)

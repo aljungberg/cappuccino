@@ -463,6 +463,9 @@
     if (!aFunction || anObject === undefined)
         return CPNotFound;
 
+    if (length === 0)
+        return -1;
+
     var mid, c, first = 0, last = length - 1;
     while (first <= last)
     {
@@ -481,8 +484,8 @@
             return mid;
         }
     }
-
-    return -mid-1;
+    
+    return -first-1;
 }
 
 /*!
@@ -511,7 +514,7 @@
 
 - (unsigned)insertObject:(id)anObject inArraySortedByDescriptors:(CPArray)descriptors
 {
-    var index = [self _insertObject:anObject sortedByFunction:function(lhs, rhs)
+    var index = [self _indexOfObject:anObject sortedByFunction:function(lhs, rhs)
     {
         var i = 0,
             count = [descriptors count],
@@ -525,7 +528,7 @@
     } context:nil];
 
     if (index < 0)
-        index = -result-1;
+        index = -index-1;
 
     [self insertObject:anObject atIndex:index];
 }
