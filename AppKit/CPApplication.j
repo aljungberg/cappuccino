@@ -34,6 +34,9 @@
 
 var CPMainCibFile               = @"CPMainCibFile",
     CPMainCibFileHumanFriendly  = @"Main cib file base name";
+    CPDefaultTheme              = @"CPDefaultTheme",
+    CPDefaultThemeHumanFriendly = @"Default theme name";
+
 
 CPApp = nil;
 
@@ -1037,9 +1040,16 @@ var _CPAppBootstrapperActions = nil;
     return [CPPlatform bootstrap];
 }
 
++ (CPString) _defaultThemeName
+{
+    var mainBundle = [CPBundle mainBundle];
+    return [mainBundle objectForInfoDictionaryKey:CPDefaultTheme] || [mainBundle objectForInfoDictionaryKey:CPDefaultThemeHumanFriendly] || "Aristo";    
+}
+
 + (BOOL)loadDefaultTheme
 {
-    var blend = [[CPThemeBlend alloc] initWithContentsOfURL:[[CPBundle bundleForClass:[CPApplication class]] pathForResource:@"Aristo.blend"]];
+    var blendFile = [CPString stringWithFormat:"%s.blend", [self _defaultThemeName]];
+    var blend = [[CPThemeBlend alloc] initWithContentsOfURL:[[CPBundle bundleForClass:[CPApplication class]] pathForResource:blendFile]];
 
     [blend loadWithDelegate:self];
 
@@ -1048,7 +1058,7 @@ var _CPAppBootstrapperActions = nil;
 
 + (void)blendDidFinishLoading:(CPBundle)aBundle
 {
-    [CPTheme setDefaultTheme:[CPTheme themeNamed:@"Aristo"]];
+    [CPTheme setDefaultTheme:[CPTheme themeNamed:[self _defaultThemeName]]];
 
     [self performActions];
 }
