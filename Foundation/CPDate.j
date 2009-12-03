@@ -177,11 +177,6 @@ var CPDateReferenceDate = new Date(Date.UTC(2001,1,1,0,0,0,0));
 */
 - (CPString)description
 {
-<<<<<<< HEAD
-    var hours = Math.floor(self.getTimezoneOffset() / 60);
-    var minutes = self.getTimezoneOffset() - hours * 60;
-    return [CPString stringWithFormat:@"%04d-%02d-%02d %02d:%02d:%02d +%02d%02d", self.getFullYear(), self.getMonth()+1, self.getDate(), self.getHours(), self.getMinutes(), self.getSeconds(), hours, minutes];
-=======
     var hours = Math.floor(self.getTimezoneOffset() / 60),
         minutes = self.getTimezoneOffset() - hours * 60;
 
@@ -207,7 +202,6 @@ var CPDateTimeKey = @"CPDateTimeKey";
 - (void)encodeWithCoder:(CPCoder)aCoder
 {
     [aCoder encodeInt:self.getTime() forKey:CPDateTimeKey];
->>>>>>> 150e264f0dc6da89542829864bfaeeb74b44c940
 }
 
 @end
