@@ -121,6 +121,9 @@
 
 #import "../../CoreGraphics/CGGeometry.h"
 
+// List of all open native windows
+var PlatformWindows = [CPSet set];
+
 // Define up here so compressor knows about em.
 var CPDOMEventGetClickCount,
     CPDOMEventStop,
@@ -358,6 +361,8 @@ var supportsNativeDragAndDrop = [CPPlatform supportsDragAndDrop];
 
             //_DOMWindow.removeEventListener("beforeunload", this, NO);
 
+            [PlatformWindows removeObject:self];
+
             self._DOMWindow = nil;
         }, NO);
     }
@@ -404,9 +409,16 @@ var supportsNativeDragAndDrop = [CPPlatform supportsDragAndDrop];
 
             //_DOMWindow.removeEvent("beforeunload", this);
 
+            [PlatformWindows removeObject:self];
+
             self._DOMWindow = nil;
         }, NO);
     }
+}
+
++ (CPSet)visiblePlatformWindows
+{
+    return PlatformWindows;
 }
 
 - (void)orderFront:(id)aSender
@@ -415,6 +427,8 @@ var supportsNativeDragAndDrop = [CPPlatform supportsDragAndDrop];
         return _DOMWindow.focus();
 
     _DOMWindow = window.open("", "_blank", "menubar=no,location=no,resizable=yes,scrollbars=no,status=no,left=" + _CGRectGetMinX(_contentRect) + ",top=" + _CGRectGetMinY(_contentRect) + ",width=" + _CGRectGetWidth(_contentRect) + ",height=" + _CGRectGetHeight(_contentRect));
+
+    [PlatformWindows addObject:self];
 
     // FIXME: cpSetFrame?
     _DOMWindow.document.write("<html><head></head><body style = 'background-color:transparent;'></body></html>");
@@ -428,6 +442,8 @@ var supportsNativeDragAndDrop = [CPPlatform supportsDragAndDrop];
         _DOMWindow.cpSetHasShadow(_hasShadow);
         _DOMWindow.cpSetShadowStyle(_shadowStyle);
     }
+
+    _DOMWindow.document.body.style.cursor = [[CPCursor currentCursor] _cssString];
 
     [self registerDOMWindow];
 }
@@ -567,7 +583,7 @@ var supportsNativeDragAndDrop = [CPPlatform supportsDragAndDrop];
                             if (_keyCode === CPKeyCodes.CAPS_LOCK)
                                 _capsLockActive = YES;
 
-                            if (modifierFlags & (CPControlKeyMask | CPCommandKeyMask | CPAlternateKeyMask))
+                            if (modifierFlags & (CPControlKeyMask | CPCommandKeyMask))
                             {
                                 //we are simply going to skip all keypress events that use cmd/ctrl key
                                 //this lets us be consistent in all browsers and send on the keydown
@@ -614,7 +630,7 @@ var supportsNativeDragAndDrop = [CPPlatform supportsDragAndDrop];
         case "keypress":
                             // we unconditionally break on keypress events with modifiers, 
                             // because we forced the event to be sent on the keydown 
-                            if (aDOMEvent.type === "keypress" && (modifierFlags & (CPControlKeyMask | CPCommandKeyMask | CPAlternateKeyMask)))
+                            if (aDOMEvent.type === "keypress" && (modifierFlags & (CPControlKeyMask | CPCommandKeyMask)))
                                 break;
 
                             var keyCode = _keyCode,
@@ -879,6 +895,8 @@ var supportsNativeDragAndDrop = [CPPlatform supportsDragAndDrop];
     // FIXME: This is not the right way to do this.
     // We should pay attention to mouse down and mouse up in conjunction with this.
     //window.liveResize = YES;
+
+    [CPApp._activeMenu cancelTracking];
 
     var oldSize = [self contentRect].size;
 

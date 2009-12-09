@@ -262,6 +262,9 @@ CPRunContinuesResponse  = -1002;
     // We do it here so that applications can change it in willFinish or didFinishLaunching
     window.status = " ";
 
+    // We also want to set the default cursor on the body, so that buttons and things don't have an iBeam
+    [[CPCursor arrowCursor] set];
+    
     var bundle = [CPBundle mainBundle],
         types = [bundle objectForInfoDictionaryKey:@"CPBundleDocumentTypes"];
         
@@ -1103,6 +1106,11 @@ var _CPAppBootstrapperActions = nil;
 + (void)cibDidFinishLoading:(CPCib)aCib
 {
     [self performActions];
+}
+
++ (void)reset
+{
+	_CPAppBootstrapperActions = nil;
 }
 
 @end
