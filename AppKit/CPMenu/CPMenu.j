@@ -648,7 +648,10 @@ var _CPMenuBarVisible               = NO,
     while ([highlightedItem submenu] && [highlightedItem action] === @selector(submenuAction:))
         highlightedItem = [[highlightedItem submenu] highlightedItem];
 
-    if (highlightedItem)
+    // FIXME: It is theoretically not necessarily to check isEnabled here since
+    // highlightedItem is always enabled. Do there exist edge cases: disabling on closing a menu,
+    // etc.? Requires further investigation and tests.
+    if (highlightedItem && [highlightedItem isEnabled])
         [CPApp sendAction:[highlightedItem action] to:[highlightedItem target] from:highlightedItem];
 }
 
@@ -920,7 +923,16 @@ var _CPMenuBarVisible               = NO,
     for(; index < count; ++index)
     {
         var item = _items[index],
-            modifierMask = [item keyEquivalentModifierMask] | ([item keyEquivalent] === [[item keyEquivalent] uppercaseString] ? CPShiftKeyMask : 0);
+            modifierMask = [item keyEquivalentModifierMask];
+
+        if ([item keyEquivalent] === [[item keyEquivalent] uppercaseString])
+            modifierMask |= CPShiftKeyMask;
+
+        if (CPBrowserIsOperatingSystem(CPWindowsOperatingSystem) && (modifierMask & CPCommandKeyMask))
+        {
+            modifierMask |= CPControlKeyMask;
+            modifierMask &= ~CPCommandKeyMask;
+        }
 
         if ((modifierFlags & (CPShiftKeyMask | CPAlternateKeyMask | CPCommandKeyMask | CPControlKeyMask)) == modifierMask &&
             [characters caseInsensitiveCompare:[item keyEquivalent]] == CPOrderedSame)

@@ -1999,7 +1999,8 @@ CPTexturedBackgroundWindowMask
 
 - (void)_setUpMasksForView:(CPView)aView
 {
-    var views = [CPArray arrayWithArray:[aView subviews]];
+    var views = [aView subviews];
+
     [views addObject:aView];
     
     for (var i = 0, count = [views count]; i < count; i++)
@@ -2014,7 +2015,8 @@ CPTexturedBackgroundWindowMask
 
 - (void)_restoreMasksForView:(CPView)aView
 {
-    var views = [CPArray arrayWithArray:[aView subviews]];
+    var views = [aView subviews];
+
     [views addObject:aView];
     
     for (var i = 0, count = [views count]; i < count; i++)
@@ -2369,9 +2371,21 @@ var keyViewComparator = function(a, b, context)
 */
 - (CPUndoManager)undoManager
 {
+    // If we've ever created an undo manager, return it.
+    if (_undoManager)
+        return _undoManager;
+
+    // If not, check to see if the document has one.
+    var documentUndoManager = [[_windowController document] undoManager];
+
+    if (documentUndoManager)
+        return documentUndoManager;
+
+    // If not, check to see if the delegate has one.
     if (_delegateRespondsToWindowWillReturnUndoManagerSelector)
         return [_delegate windowWillReturnUndoManager:self];
-    
+
+    // If not, create one.
     if (!_undoManager)
         _undoManager = [[CPUndoManager alloc] init];
 

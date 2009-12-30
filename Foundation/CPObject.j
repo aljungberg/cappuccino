@@ -227,6 +227,7 @@ CPLog(@"Got some class: %@", inst);
 */
 - (BOOL)respondsToSelector:(SEL)aSelector
 {
+    // isa is isa.isa in class case.
     return !!class_getInstanceMethod(isa, aSelector);
 }
 
@@ -269,7 +270,7 @@ CPLog(@"Got some class: %@", inst);
 */
 - (CPString)description
 {
-    return "<" + isa.name + " 0x" + [CPString stringWithHash:[self UID]] + ">";
+    return "<" + class_getName(isa) + " 0x" + [CPString stringWithHash:[self UID]] + ">";
 }
 
 // Sending Messages
@@ -322,6 +323,7 @@ CPLog(@"Got some class: %@", inst);
     Used for forwarding of messages to other objects.
     @ignore
 */
+// FIXME: This should be moved to the runtime?
 - (void)forward:(SEL)aSelector :(marg_list)args
 {
     var signature = [self methodSignatureForSelector:aSelector];
@@ -468,12 +470,12 @@ CPLog(@"Got some class: %@", inst);
     return [self UID];
 }
 
-- (unsigned)UID
+- (CPString)UID
 {
     if (typeof self.__address === "undefined")
         self.__address = _objj_generateObjectHash();
 
-    return __address;
+    return __address + "";
 }
 
 /*!
