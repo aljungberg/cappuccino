@@ -570,6 +570,15 @@ CPTableViewSolidHorizontalGridLineMask = 1 << 1;
 
 - (void)selectRowIndexes:(CPIndexSet)rows byExtendingSelection:(BOOL)shouldExtendSelection
 {
+    /*
+    This indirection allows the Bindings category to override this method without code
+    duplication.
+    */
+    [self _selectRowIndexes: rows byExtendingSelection: shouldExtendSelection];
+}
+
+- (void)_selectRowIndexes:(CPIndexSet)rows byExtendingSelection:(BOOL)shouldExtendSelection
+{
     // We deselect all rows when selecting columns.
     _selectedColumnIndexes = [CPIndexSet indexSet];
 
@@ -1768,6 +1777,34 @@ CPTableViewSolidHorizontalGridLineMask = 1 << 1;
 - (void)setContent:(CPArray)content
 {
     [self reloadData];
+}
+
+- (void)setValue:(id)aValue forKey:(CPString)aKey
+{
+    if (aKey == 'selectionIndexes')
+    {
+        [self _selectRowIndexes: aValue byExtendingSelection: NO];
+    }
+    else
+    {
+        [super setValue:aValue forKey:aKey];
+    }
+}
+
+- (void)selectRowIndexes:(CPIndexSet)rows byExtendingSelection:(BOOL)shouldExtendSelection
+{
+    var selectionBinding = [self infoForBinding:@"selectionIndexes"];
+    if (selectionBinding)
+    {
+        [self willChangeValueForKey:@"selectionIndexes"];
+    }
+
+    [self _selectRowIndexes: rows byExtendingSelection: shouldExtendSelection];
+
+    if (selectionBinding)
+    {
+        [self didChangeValueForKey:@"selectionIndexes"];
+    }
 }
 
 @end
