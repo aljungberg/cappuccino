@@ -552,7 +552,7 @@
 - (id)objectAtIndex:(int)anIndex
 {
     if (anIndex >= length || anIndex < 0)
-        [CPException raise:CPRangeException reason:@"index (" + anIndex + @") out of bounds (0 - " + length + @")"];
+        [CPException raise:CPRangeException reason:@"index (" + anIndex + @") beyond bounds (" + length + @")"];
 
     return self[anIndex];
 }
