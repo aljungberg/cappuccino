@@ -32,14 +32,19 @@ parser.option("-F", "--framework", "frameworks")
     .help("Add a frameworks directory, relative to INPUT_PROJECT (default: ['Frameworks'])");
 
 parser.option("-E", "--environment", "environments")
-    .def(['W3C', 'IE7', 'IE8'])
+    .def(['W3C'])//, 'IE7', 'IE8'])
     .push()
     .help("Add a platform name (default: ['W3C', 'IE7', 'IE8'])");
 
-parser.option("-f", "--flatten", "flatten")
+parser.option("-l", "--flatten", "flatten")
     .def(false)
     .set(true)
     .help("Flatten all code into a single Application.js file and attempt add script tag to index.html (useful for Adobe AIR and CDN deployment)");
+
+parser.option("-f", "--force", "force")
+   .def(false)
+   .set(true)
+   .help("Force overwriting OUTPUT_PROJECT if it exists");
 
 parser.option("-n", "--nostrip", "strip")
     .def(true)
@@ -72,8 +77,14 @@ function main(args)
     //else
     //    CPLogRegisterRange(CPLogPrint, "fatal", "info");
 
-    var rootPath = FILE.path(options.args[0]).absolute();
-    var outputPath = FILE.path(options.args[1]).absolute();
+    // HACK: ensure trailing slashes for "relative" to work correctly
+    var rootPath = FILE.path(options.args[0]).join("").absolute();
+    var outputPath = FILE.path(options.args[1]).join("").absolute();
+
+    if (!options.force && outputPath.exists()) {
+        CPLog.error("OUTPUT_PROJECT " + outputPath + " exists. Use -f to overwrite.");
+        OS.exit(1);
+    }
 
     press(rootPath, outputPath, options);
 }
@@ -96,9 +107,7 @@ function press(rootPath, outputPath, options) {
     FILE.copyTree(rootPath, outputPath);
     
     for (var path in outputFiles) {
-        CPLog.trace("Writing: " + path);
-        
-        var file = outputPath.join(relativeToRootPath(path));
+        var file = outputPath.join(rootPath.relative(path));
         
         var parent = file.dirname();
         if (!parent.exists()) {
@@ -113,6 +122,7 @@ function press(rootPath, outputPath, options) {
         FILE.write(file, outputFiles[path], { charset : "UTF-8" });
     }
     
+    // strip known unnecessary files
     // outputPath.glob("**/Frameworks/Debug").forEach(function(debugFramework) {
     //     outputPath.join(debugFramework).rmtree();
     // });
@@ -124,10 +134,6 @@ function press(rootPath, outputPath, options) {
 }
 
 function pressEnvironment(rootPath, outputFiles, environment, options) {
-    
-    function relativeToRootPath(path) {
-        return pathRelativeTo(path, rootPath);
-    }
     
     var mainPath = String(rootPath.join(options.main));
     var frameworks = options.frameworks.map(function(framework) { return rootPath.join(framework); });
@@ -153,7 +159,7 @@ function pressEnvironment(rootPath, outputFiles, environment, options) {
     scope.objj_search.prototype.didReceiveBundleResponse = function(aResponse) {
         var fakeResponse = {
             success : aResponse.success,
-            filePath : relativeToRootPath(aResponse.filePath)
+            filePath : rootPath.relative(aResponse.filePath).toString()
         };
     
         if (aResponse.success)
@@ -170,7 +176,7 @@ function pressEnvironment(rootPath, outputFiles, environment, options) {
     var context = {
         ctx : ctx,
         scope : scope,
-        relativeToRootPath : relativeToRootPath
+        rootPath : rootPath
     };
     
     // phase 1: get global defines
@@ -184,7 +190,7 @@ function pressEnvironment(rootPath, outputFiles, environment, options) {
     // Log 
     CPLog.trace("Global defines:");
     for (var i in dependencies)
-        CPLog.trace("    " + i + " => " + relativeToRootPath(dependencies[i]));
+        CPLog.trace("    " + i + " => " + rootPath.relative(dependencies[i]));
     
     // phase 2: walk the dependency tree (both imports and references) to determine exactly which files need to be included
     CPLog.error("PHASE 2: Walk dependency tree...");
@@ -221,12 +227,12 @@ function pressEnvironment(rootPath, outputFiles, environment, options) {
         {
             if (requiredFiles[path])
             {
-                CPLog.debug("Included: " + relativeToRootPath(path));
+                CPLog.debug("Included: " + rootPath.relative(path));
                 count++;
             }
             else
             {
-                CPLog.info("Excluded: " + relativeToRootPath(path));
+                CPLog.info("Excluded: " + rootPath.relative(path));
             }    
             total++;
         }
@@ -273,12 +279,23 @@ function pressEnvironment(rootPath, outputFiles, environment, options) {
         
         var applicationScript = [];
         
+        var URIMaps = {};
+        Object.keys(scope.objj_bundles).forEach(function(bundleName) {
+            var bundle = scope.objj_bundles[bundleName];
+            var path = rootPath.relative(bundle.path);
+            if (bundle._URIMap)
+                URIMaps[path] = bundle._URIMap;
+        });
+
         // add fake bundle response bookkeeping
         applicationScript.push("(function() {")
         applicationScript.push("    var didReceiveBundleResponse = " + String(fakeDidReceiveBundleResponse));
         applicationScript.push("    var bundleArchiveResponses = " + JSON.stringify(bundleArchiveResponses) + ";");
         applicationScript.push("    for (var i = 0; i < bundleArchiveResponses.length; i++)");
         applicationScript.push("        didReceiveBundleResponse(bundleArchiveResponses[i]);");
+        applicationScript.push("    var URIMaps = " + JSON.stringify(URIMaps) + ";");
+        applicationScript.push("    for (var bundleName in URIMaps)");
+        applicationScript.push("        objj_bundles[bundleName]._URIMap = URIMaps[bundleName];");
         applicationScript.push("})();");
         
         // add each fragment, wrapped in a function, along with OBJJ_CURRENT_BUNDLE bookkeeping
@@ -287,11 +304,11 @@ function pressEnvironment(rootPath, outputFiles, environment, options) {
             {
                 applicationScript.push("(function(OBJJ_CURRENT_BUNDLE) {");
                 applicationScript.push(fragment.info);
-                applicationScript.push("})(objj_bundles['"+relativeToRootPath(fragment.bundle.path)+"']);");
+                applicationScript.push("})(objj_bundles['"+rootPath.relative(fragment.bundle.path)+"']);");
             }
             else
             {
-                CPLog.info("Stripping " + relativeToRootPath(fragment.file.path));
+                CPLog.info("Stripping " + rootPath.relative(fragment.file.path));
             }
         });
         
@@ -403,7 +420,7 @@ function pressEnvironment(rootPath, outputFiles, environment, options) {
                                 }
                             }
                             else
-                                CPLog.info("Ignoring import fragment " + file.fragments[i].info + " in " + relativeToRootPath(path));
+                                CPLog.info("Ignoring import fragment " + file.fragments[i].info + " in " + rootPath.relative(path));
                         }
                         else
                             CPLog.error("Unknown fragment type");
@@ -416,7 +433,7 @@ function pressEnvironment(rootPath, outputFiles, environment, options) {
                 }
             }
             else
-                CPLog.warn("No bundle for " + relativeToRootPath(path))
+                CPLog.warn("No bundle for " + rootPath.relative(path))
         }
 
         // phase 3.5: fix bundle plists
@@ -428,7 +445,7 @@ function pressEnvironment(rootPath, outputFiles, environment, options) {
                 dict = bundles[path].info,
                 replacedFiles = [dict objectForKey:"CPBundleReplacedFiles"];
             
-            CPLog.info("Modifying .sj: " + relativeToRootPath(path));
+            CPLog.info("Modifying .sj: " + rootPath.relative(path));
             
             if (replacedFiles)
             {
