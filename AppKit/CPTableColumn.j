@@ -27,21 +27,10 @@
 
 @import "CPTableHeaderView.j"
 
+#include "CoreGraphics/CGGeometry.h"
 
-/*
-    @global
-    @class CPTableColumn
-*/
 CPTableColumnNoResizing         = 0;
-/*
-    @global
-    @class CPTableColumn
-*/
 CPTableColumnAutoresizingMask   = 1;
-/*
-    @global
-    @class CPTableColumn
-*/
 CPTableColumnUserResizingMask   = 2;
 
 @implementation CPTableColumn : CPObject
@@ -54,6 +43,7 @@ CPTableColumnUserResizingMask   = 2;
     float               _width;
     float               _minWidth;
     float               _maxWidth;
+    unsigned            _resizingMask;
 
     id                  _identifier;
     BOOL                _isEditable;
@@ -81,7 +71,11 @@ CPTableColumnUserResizingMask   = 2;
 
         [self setIdentifier:anIdentifier];
         [self setHeaderView:[CPTextField new]];
-        [self setDataView:[CPTextField new]];
+        
+        var textDataView = [CPTextField new];
+        [textDataView setValue:[CPColor whiteColor] forThemeAttribute:@"text-color" inState:CPThemeStateHighlighted];
+        [textDataView setValue:[CPFont boldSystemFontOfSize:12] forThemeAttribute:@"font" inState:CPThemeStateHighlighted];
+        [self setDataView:textDataView];
     }
 
     return self;
