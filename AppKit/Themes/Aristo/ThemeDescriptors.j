@@ -826,16 +826,16 @@
             ]
         isVertical:YES]);
 
-    var knobDisabledColor = PatternColor([[CPThreePartImage alloc] initWithImageSlices:
+    /*var knobDisabledColor = PatternColor([[CPThreePartImage alloc] initWithImageSlices:
             [
                 [_CPCibCustomResource imageResourceWithName:"HUD/scroller-vertical-knob-disabled-top.png" size:CGSizeMake(15.0, 10.0)],
                 [_CPCibCustomResource imageResourceWithName:"HUD/scroller-vertical-knob-disabled-center.png" size:CGSizeMake(15.0, 1.0)],
                 [_CPCibCustomResource imageResourceWithName:"HUD/scroller-vertical-knob-disabled-bottom.png" size:CGSizeMake(15.0, 10.0)]
             ]
-        isVertical:YES]);
+        isVertical:YES]);*/
     
     [scroller setValue:knobColor forThemeAttribute:@"knob-color" inState:CPThemeStateVertical];
-    [scroller setValue:knobDisabledColor forThemeAttribute:@"knob-color" inState:CPThemeStateVertical|CPThemeStateDisabled];
+    //[scroller setValue:knobDisabledColor forThemeAttribute:@"knob-color" inState:CPThemeStateVertical|CPThemeStateDisabled];
     
     [scroller setFloatValue:0.1];
     [scroller setKnobProportion:0.5];
@@ -882,16 +882,16 @@
             ]
         isVertical:NO]);
 
-    var knobDisabledColor = PatternColor([[CPThreePartImage alloc] initWithImageSlices:
+    /*var knobDisabledColor = PatternColor([[CPThreePartImage alloc] initWithImageSlices:
             [
                 [_CPCibCustomResource imageResourceWithName:"HUD/scroller-horizontal-knob-disabled-left.png" size:CGSizeMake(10.0, 15.0)],
                 [_CPCibCustomResource imageResourceWithName:"HUD/scroller-horizontal-knob-disabled-center.png" size:CGSizeMake(1.0, 15.0)],
                 [_CPCibCustomResource imageResourceWithName:"HUD/scroller-horizontal-knob-disabled-right.png" size:CGSizeMake(10.0, 15.0)]
             ]
-        isVertical:NO]);
+        isVertical:NO]);*/
 
     [scroller setValue:knobColor forThemeAttribute:@"knob-color"];
-    [scroller setValue:knobDisabledColor forThemeAttribute:@"knob-color" inState:CPThemeStateDisabled];
+    //[scroller setValue:knobDisabledColor forThemeAttribute:@"knob-color" inState:CPThemeStateDisabled];
 
     [scroller setFloatValue:0.1];
     [scroller setKnobProportion:0.5];

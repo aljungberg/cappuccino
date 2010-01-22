@@ -226,7 +226,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
         _exposedColumns = [CPIndexSet indexSet];
         _cachedDataViews = { };
         _intercellSpacing = _CGSizeMake(0.0, 0.0);
-        _rowHeight = 19.0;
+        _rowHeight = 23.0;
 
         [self setSelectionHightlightColor:[CPColor selectionColor]];
         [self setGridColor:[CPColor grayColor]];
@@ -241,17 +241,19 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
         _selectedColumnIndexes = [CPIndexSet indexSet];
         _selectedRowIndexes = [CPIndexSet indexSet];
-        _draggedRowIndexes = [CPIndexSet indexSet];
-        _verticalMotionCanDrag = YES;
-        _isSelectingSession = NO;
-        _retargetedDropRow = nil;
-        _retargetedDropOperation = nil;
-        _dragOperationDefaultMask = nil;
-        _destinationDragStyle = CPTableViewDraggingDestinationFeedbackStyleRegular;
-        _dropOperationFeedbackView = [[_dropOperationDrawingView alloc] initWithFrame:_CGRectMakeZero()];
+window.setTimeout(function(){
+        self._draggedRowIndexes = [CPIndexSet indexSet];
+        self._verticalMotionCanDrag = YES;
+        self._isSelectingSession = NO;
+        self._retargetedDropRow = nil;
+        self._retargetedDropOperation = nil;
+        self._dragOperationDefaultMask = nil;
+        self._destinationDragStyle = CPTableViewDraggingDestinationFeedbackStyleRegular;
+        self._dropOperationFeedbackView = [[_dropOperationDrawingView alloc] initWithFrame:_CGRectMakeZero()];
         [self addSubview:_dropOperationFeedbackView];
         [_dropOperationFeedbackView setHidden:YES];
         [_dropOperationFeedbackView setTableView:self];
+},0);
 
         _tableDrawView = [[_CPTableDrawView alloc] initWithTableView:self];
         [_tableDrawView setBackgroundColor:[CPColor clearColor]];
