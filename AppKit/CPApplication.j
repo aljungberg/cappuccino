@@ -965,7 +965,7 @@ CPRunContinuesResponse  = -1002;
 + (CPString)defaultThemeName
 {
     // FIXME: don't hardcode
-    return @"Aristo.blend";
+    return ([[CPBundle mainBundle] objectForInfoDictionaryKey:"CPDefaultTheme"] || @"Aristo");
 }
 
 @end
@@ -1070,16 +1070,9 @@ var _CPAppBootstrapperActions = nil;
     return [CPPlatform bootstrap];
 }
 
-+ (CPString) _defaultThemeName
-{
-    var mainBundle = [CPBundle mainBundle];
-    return [mainBundle objectForInfoDictionaryKey:CPDefaultTheme] || [mainBundle objectForInfoDictionaryKey:CPDefaultThemeHumanFriendly] || "Aristo";
-}
-
 + (BOOL)loadDefaultTheme
 {
-    var blendFile = [CPString stringWithFormat:"%s.blend", [self _defaultThemeName]];
-    var blend = [[CPThemeBlend alloc] initWithContentsOfURL:[[CPBundle bundleForClass:[CPApplication class]] pathForResource:blendFile]];
+    var blend = [[CPThemeBlend alloc] initWithContentsOfURL:[[CPBundle bundleForClass:[CPApplication class]] pathForResource:[CPApplication defaultThemeName] + ".blend"]];
 
     [blend loadWithDelegate:self];
 
@@ -1088,7 +1081,7 @@ var _CPAppBootstrapperActions = nil;
 
 + (void)blendDidFinishLoading:(CPBundle)aBundle
 {
-    [CPTheme setDefaultTheme:[CPTheme themeNamed:[self _defaultThemeName]]];
+    [CPTheme setDefaultTheme:[CPTheme themeNamed:[CPApplication defaultThemeName]]];
 
     [self performActions];
 }
