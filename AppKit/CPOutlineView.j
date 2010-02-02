@@ -50,16 +50,43 @@ var CPOutlineViewDataSource_outlineView_setObjectValue_forTableColumn_byItem_   
 
     CPOutlineViewDataSource_outlineView_sortDescriptorsDidChange_                                   = 1 << 10;
 
+var CPOutlineViewDelegate_outlineView_dataCellForTableColumn_item_                                  = 1 << 0,
+    CPOutlineViewDelegate_outlineView_didClickTableColumn_                                          = 1 << 1,
+    CPOutlineViewDelegate_outlineView_didDragTableColumn_                                           = 1 << 2,
+    CPOutlineViewDelegate_outlineView_heightOfRowByItem_                                            = 1 << 3,
+    CPOutlineViewDelegate_outlineView_isGroupItem_                                                  = 1 << 4,
+    CPOutlineViewDelegate_outlineView_mouseDownInHeaderOfTableColumn_                               = 1 << 5,
+    CPOutlineViewDelegate_outlineView_nextTypeSelectMatchFromItem_toItem_forString_                 = 1 << 6,
+    CPOutlineViewDelegate_outlineView_selectionIndexesForProposedSelection_                         = 1 << 7,
+    CPOutlineViewDelegate_outlineView_shouldCollapseItem_                                           = 1 << 8,
+    CPOutlineViewDelegate_outlineView_shouldEditTableColumn_item_                                   = 1 << 9,
+    CPOutlineViewDelegate_outlineView_shouldExpandItem_                                             = 1 << 10,
+    CPOutlineViewDelegate_outlineView_shouldReorderColumn_toColumn_                                 = 1 << 11,
+    CPOutlineViewDelegate_outlineView_shouldSelectItem_                                             = 1 << 12,
+    CPOutlineViewDelegate_outlineView_shouldSelectTableColumn_                                      = 1 << 13,
+    CPOutlineViewDelegate_outlineView_shouldShowCellExpansionForTableColumn_item_                   = 1 << 14,
+    CPOutlineViewDelegate_outlineView_shouldShowOutlineCellForItem_                                 = 1 << 15,
+    CPOutlineViewDelegate_outlineView_shouldTrackCell_forTableColumn_item_                          = 1 << 16,
+    CPOutlineViewDelegate_outlineView_shouldTypeSelectForEvent_withCurrentSearchString_             = 1 << 17,
+    CPOutlineViewDelegate_outlineView_sizeToFitWidthOfColumn_                                       = 1 << 18,
+    CPOutlineViewDelegate_outlineView_toolTipForCell_rect_tableColumn_item_mouseLocation_           = 1 << 19,
+    CPOutlineViewDelegate_outlineView_typeSelectStringForTableColumn_item_                          = 1 << 20,
+    CPOutlineViewDelegate_outlineView_willDisplayCell_forTableColumn_item_                          = 1 << 21,
+    CPOutlineViewDelegate_outlineView_willDisplayOutlineCell_forTableColumn_item_                   = 1 << 22,
+    CPOutlineViewDelegate_selectionShouldChangeInOutlineView_                                       = 1 << 23;
+
 @implementation CPOutlineView : CPTableView
 {
     id              _outlineViewDataSource;
+    CPInteger       _implementedOutlineViewDataSourceMethods;
+
     id              _outlineViewDelegate;
+    CPInteger       _implementedOutlineViewDelegateMethods;
+
     CPTableColumn   _outlineTableColumn;
 
     float           _indentationPerLevel;
     BOOL            _indentationMarkerFollowsDataView;
-
-    CPInteger       _implementedOutlineViewDataSourceMethods;
 
     Object          _rootItemInfo;
     CPMutableArray  _itemsForRows;
@@ -88,6 +115,7 @@ var CPOutlineViewDataSource_outlineView_setObjectValue_forTableColumn_byItem_   
         [self setIndentationMarkerFollowsDataView:YES];
 
         [super setDataSource:[[_CPOutlineViewTableViewDataSource alloc] initWithOutlineView:self]];
+        [super setDelegate:[[_CPOutlineViewTableViewDelegate alloc] initWithOutlineView:self]];
 
         [self setDisclosureControlPrototype:[[CPDisclosureButton alloc] initWithFrame:CGRectMake(0.0, 0.0, 10.0, 10.0)]];
     }
@@ -372,63 +400,81 @@ var CPOutlineViewDataSource_outlineView_setObjectValue_forTableColumn_byItem_   
                         object:self];
     }
 
-    _outlineViewDelegate = aDelegate;/*
-    _implementedDelegateMethods = 0;
+    _outlineViewDelegate = aDelegate;
+    _implementedOutlineViewDelegateMethods = 0;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(selectionShouldChangeInTableView:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_selectionShouldChangeInTableView_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:dataCellForTableColumn:item:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_dataCellForTableColumn_item_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:dataViewForTableColumn:row:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_dataViewForTableColumn_row_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:didClickTableColumn:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_didClickTableColumn_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:didClickTableColumn:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_didClickTableColumn_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:didDragTableColumn:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_didDragTableColumn_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:didDragTableColumn:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_didDragTableColumn_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:heightOfRowByItem:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_heightOfRowByItem_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:heightOfRow:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_heightOfRow_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:isGroupItem:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_isGroupItem_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:isGroupRow:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_isGroupRow_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:mouseDownInHeaderOfTableColumn:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_mouseDownInHeaderOfTableColumn_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:mouseDownInHeaderOfTableColumn:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_mouseDownInHeaderOfTableColumn_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:nextTypeSelectMatchFromItem:toItem:forString:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_nextTypeSelectMatchFromItem_toItem_forString_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:nextTypeSelectMatchFromRow:toRow:forString:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_nextTypeSelectMatchFromRow_toRow_forString_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:selectionIndexesForProposedSelection:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_selectionIndexesForProposedSelection_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:selectionIndexesForProposedSelection:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_selectionIndexesForProposedSelection_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:shouldCollapseItem:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_shouldCollapseItem_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:shouldEditTableColumn:row:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_shouldEditTableColumn_row_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:shouldEditTableColumn:item:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_shouldEditTableColumn_item_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:shouldSelectRow:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_shouldSelectRow_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:shouldExpandItem:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_shouldExpandItem_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:shouldSelectTableColumn:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_shouldSelectTableColumn_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:shouldReorderColumn:toColumn:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_shouldReorderColumn_toColumn_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:shouldShowViewExpansionForTableColumn:row:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_shouldShowViewExpansionForTableColumn_row_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:shouldSelectItem:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_shouldSelectItem_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:shouldTrackView:forTableColumn:row:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_shouldTrackView_forTableColumn_row_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:shouldSelectTableColumn:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_shouldSelectTableColumn_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:shouldTypeSelectForEvent:withCurrentSearchString:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_shouldTypeSelectForEvent_withCurrentSearchString_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:shouldShowCellExpansionForTableColumn:item:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_shouldShowCellExpansionForTableColumn_item_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:toolTipForView:rect:tableColumn:row:mouseLocation:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_toolTipForView_rect_tableColumn_row_mouseLocation_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:shouldShowOutlineCellForItem:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_shouldShowOutlineCellForItem_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:typeSelectStringForTableColumn:row:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_typeSelectStringForTableColumn_row_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:shouldTrackCell:forTableColumn:item:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_shouldTrackCell_forTableColumn_item_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(tableView:willDisplayView:forTableColumn:row:)])
-        _implementedDelegateMethods |= CPTableViewDelegate_tableView_willDisplayView_forTableColumn_row_;
-*/
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:shouldTypeSelectForEvent:withCurrentSearchString:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_shouldTypeSelectForEvent_withCurrentSearchString_;
+
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:sizeToFitWidthOfColumn:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_sizeToFitWidthOfColumn_;
+
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:toolTipForCell:rect:tableColumn:item:mouseLocation:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_toolTipForCell_rect_tableColumn_item_mouseLocation_;
+
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:typeSelectStringForTableColumn:item:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_typeSelectStringForTableColumn_item_;
+
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:willDisplayCell:forTableColumn:item:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_willDisplayCell_forTableColumn_item_;
+
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:willDisplayOutlineCell:forTableColumn:item:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_willDisplayOutlineCell_forTableColumn_item_;
+
+    if ([_outlineViewDelegate respondsToSelector:@selector(selectionShouldChangeInOutlineView:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_selectionShouldChangeInOutlineView_;
+
     if ([_outlineViewDelegate respondsToSelector:@selector(outlineViewColumnDidMove:)])
         [defaultCenter
             addObserver:_outlineViewDelegate
@@ -618,7 +664,7 @@ var CPOutlineViewDataSource_outlineView_setObjectValue_forTableColumn_byItem_   
 
 @end
 
-// FIX ME: We're using with() here because Safari fails if we use anOutlineView._itemInfosForItems or whatever... 
+// FIX ME: We're using with() here because Safari fails if we use anOutlineView._itemInfosForItems or whatever...
 var _reloadItem = function(/*CPOutlineView*/ anOutlineView, /*id*/ anItem)
 {
     if (!anItem)
@@ -630,55 +676,55 @@ var _reloadItem = function(/*CPOutlineView*/ anOutlineView, /*id*/ anItem)
             dataSource = _outlineViewDataSource,
             itemUID = [anItem UID],
             itemInfo = itemInfosForItems[itemUID];
-        
+
         // If we're not in the tree, then just bail.
         if (!itemInfo)
             return [];
-        
+
         // See if the item itself can be swapped out.
         var parent = itemInfo.parent,
             parentItemInfo = parent ? itemInfosForItems[[parent UID]] : _rootItemInfo,
             parentChildren = parentItemInfo.children,
             index = [parentChildren indexOfObjectIdenticalTo:anItem],
             newItem = [dataSource outlineView:anOutlineView child:index ofItem:parent];
-        
+
         if (anItem !== newItem)
         {
             itemInfosForItems[[anItem UID]] = nil;
             itemInfosForItems[[newItem UID]] = itemInfo;
-        
+
             parentChildren[index] = newItem;
             _itemsForRows[itemInfo.row] = newItem;
         }
-        
+
         itemInfo.isExpandable = [dataSource outlineView:anOutlineView isItemExpandable:newItem];
         itemInfo.isExpanded = itemInfo.isExpandable && itemInfo.isExpanded;
     }
 }
 
-// FIX ME: We're using with() here because Safari fails if we use anOutlineView._itemInfosForItems or whatever... 
+// FIX ME: We're using with() here because Safari fails if we use anOutlineView._itemInfosForItems or whatever...
 var _loadItemInfoForItem = function(/*CPOutlineView*/ anOutlineView, /*id*/ anItem,  /*BOOL*/ isIntermediate)
 {
     with(anOutlineView)
     {
         var itemInfosForItems = _itemInfosForItems,
             dataSource = _outlineViewDataSource;
-        
+
         if (!anItem)
             var itemInfo = _rootItemInfo;
-        
+
         else
         {
             // Get the existing info if it exists.
             var itemUID = [anItem UID],
                 itemInfo = itemInfosForItems[itemUID];
-        
+
             // If we're not in the tree, then just bail.
             if (!itemInfo)
                 return [];
-        
+
             itemInfo.isExpandable = [dataSource outlineView:anOutlineView isItemExpandable:anItem];
-        
+
             // If we were previously expanded, but now no longer expandable, "de-expand".
             // NOTE: we are *not* collapsing, thus no notification is posted.
             if (!itemInfo.isExpandable && itemInfo.isExpanded)
@@ -687,72 +733,72 @@ var _loadItemInfoForItem = function(/*CPOutlineView*/ anOutlineView, /*id*/ anIt
                 itemInfo.children = [];
             }
         }
-        
+
         // The root item does not count as a descendant.
         var weight = itemInfo.weight,
             descendants = anItem ? [anItem] : [];
-        
+
         if (itemInfo.isExpanded && (!(_implementedOutlineViewDataSourceMethods & CPOutlineViewDataSource_outlineView_shouldDeferDisplayingChildrenOfItem_) ||
             ![dataSource outlineView:anOutlineView shouldDeferDisplayingChildrenOfItem:anItem]))
         {
             var index = 0,
                 count = [dataSource outlineView:anOutlineView numberOfChildrenOfItem:anItem],
                 level = itemInfo.level + 1;
-        
+
             itemInfo.children = [];
-        
+
             for (; index < count; ++index)
             {
                 var childItem = [dataSource outlineView:anOutlineView child:index ofItem:anItem],
                     childItemInfo = itemInfosForItems[[childItem UID]];
-        
+
                 if (!childItemInfo)
                 {
                     childItemInfo = { isExpanded:NO, isExpandable:NO, children:[], weight:1 };
                     itemInfosForItems[[childItem UID]] = childItemInfo;
                 }
-        
+
                 itemInfo.children[index] = childItem;
-        
+
                 var childDescendants = _loadItemInfoForItem(anOutlineView, childItem, YES);
-        
+
                 childItemInfo.parent = anItem;
                 childItemInfo.level = level;
                 descendants = descendants.concat(childDescendants);
             }
         }
-        
+
         itemInfo.weight = descendants.length;
-        
+
         if (!isIntermediate)
         {
             // row = -1 is the root item, so just go to row 0 since it is ignored.
             var index = MAX(itemInfo.row, 0),
                 itemsForRows = _itemsForRows;
-        
+
             descendants.unshift(index, weight);
-        
+
             itemsForRows.splice.apply(itemsForRows, descendants);
-        
+
             var count = itemsForRows.length;
-        
+
             for (; index < count; ++index)
                 itemInfosForItems[[itemsForRows[index] UID]].row = index;
-        
+
             var deltaWeight = itemInfo.weight - weight;
-        
+
             if (deltaWeight !== 0)
             {
                 var parent = itemInfo.parent;
-        
+
                 while (parent)
                 {
                     var parentItemInfo = itemInfosForItems[[parent UID]];
-        
+
                     parentItemInfo.weight += deltaWeight;
                     parent = parentItemInfo.parent;
                 }
-        
+
                 if (anItem)
                     _rootItemInfo.weight += deltaWeight;
             }
@@ -801,6 +847,15 @@ var _loadItemInfoForItem = function(/*CPOutlineView*/ anOutlineView, /*id*/ anIt
         _outlineView = anOutlineView;
 
     return self;
+}
+
+- (BOOL)tableView:(CPTableView)aTableView shouldSelectRow:(CPInteger)aRow
+{
+    if (_outlineView._implementedOutlineViewDelegateMethods & CPOutlineViewDelegate_outlineView_shouldSelectItem_)
+    {
+        return [_outlineView._outlineViewDelegate outlineView:self shouldSelectItem:[_outlineView itemAtRow:aRow]];
+    }
+    return YES;
 }
 
 @end
