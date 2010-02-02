@@ -191,14 +191,14 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     SEL         _doubleAction;
     unsigned    _columnAutoResizingStyle;
 
-//    BOOL        _verticalMotionCanDrag;
-//    unsigned    _destinationDragStyle;
-//    BOOL        _isSelectingSession;
-//    CPIndexSet  _draggedRowIndexes;
-//    _dropOperationDrawingView _dropOperationFeedbackView;
-//    CPDragOperation _dragOperationDefaultMask;
-//    int         _retargetedDropRow;
-//    CPDragOperation _retargetedDropOperation;
+    BOOL        _verticalMotionCanDrag;
+    unsigned    _destinationDragStyle;
+    BOOL        _isSelectingSession;
+    CPIndexSet  _draggedRowIndexes;
+    _dropOperationDrawingView _dropOperationFeedbackView;
+    CPDragOperation _dragOperationDefaultMask;
+    int         _retargetedDropRow;
+    CPDragOperation _retargetedDropOperation;
 }
 
 - (id)initWithFrame:(CGRect)aFrame
@@ -247,22 +247,20 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
         _cornerView = nil; //[[_CPCornerView alloc] initWithFrame:CGRectMake(0, 0, [CPScroller scrollerWidth], CGRectGetHeight([_headerView frame]))];
 
-
         _selectedColumnIndexes = [CPIndexSet indexSet];
         _selectedRowIndexes = [CPIndexSet indexSet];
-window.setTimeout(function(){
-        self._draggedRowIndexes = [CPIndexSet indexSet];
-        self._verticalMotionCanDrag = YES;
-        self._isSelectingSession = NO;
-        self._retargetedDropRow = nil;
-        self._retargetedDropOperation = nil;
-        self._dragOperationDefaultMask = nil;
-        self._destinationDragStyle = CPTableViewDraggingDestinationFeedbackStyleRegular;
-        self._dropOperationFeedbackView = [[_dropOperationDrawingView alloc] initWithFrame:_CGRectMakeZero()];
+
+        _draggedRowIndexes = [CPIndexSet indexSet];
+        _verticalMotionCanDrag = YES;
+        _isSelectingSession = NO;
+        _retargetedDropRow = nil;
+        _retargetedDropOperation = nil;
+        _dragOperationDefaultMask = nil;
+        _destinationDragStyle = CPTableViewDraggingDestinationFeedbackStyleRegular;
+        _dropOperationFeedbackView = [[_dropOperationDrawingView alloc] initWithFrame:_CGRectMakeZero()];
         [self addSubview:_dropOperationFeedbackView];
         [_dropOperationFeedbackView setHidden:YES];
         [_dropOperationFeedbackView setTableView:self];
-},0);
 
         _tableDrawView = [[_CPTableDrawView alloc] initWithTableView:self];
         [_tableDrawView setBackgroundColor:[CPColor clearColor]];
@@ -1993,11 +1991,6 @@ window.setTimeout(function(){
     [self highlightSelectionInClipRect:exposedRect];
 }
 
-- (void)drawRect:(CGRect)aRect
-{
-    [_tableDrawView display];
-}
-
 - (void)drawBackgroundInClipRect:(CGRect)aRect
 {
     if (![self usesAlternatingRowBackgroundColors])
@@ -2021,20 +2014,21 @@ window.setTimeout(function(){
     // CGContextFillRect(context, CGRectIntersection(aRect, fillRect));
     // console.profile("row-paint");
     var exposedRows = [self rowsInRect:aRect],
-        firstRow = exposedRows.location -1,
+        firstRow = exposedRows.location,
         lastRow = CPMaxRange(exposedRows) - 1,
         colorIndex = MIN(exposedRows.length, colorCount),
         heightFilled = 0.0;
 
     while (colorIndex--)
     {
-        var row = firstRow % colorCount + firstRow + colorIndex,
+        var row = firstRow - firstRow % colorCount + colorIndex,
             fillRect = nil;
 
         CGContextBeginPath(context);
 
         for (; row <= lastRow; row += colorCount)
-            CGContextAddRect(context, CGRectIntersection(aRect, fillRect = [self rectOfRow:row]));
+            if (row >= firstRow)
+                CGContextAddRect(context, CGRectIntersection(aRect, fillRect = [self rectOfRow:row]));
 
         if (row - colorCount === lastRow)
             heightFilled = _CGRectGetMaxY(fillRect);
@@ -2440,9 +2434,9 @@ window.setTimeout(function(){
         rowIndex = [self rowAtPoint:aPoint];
         if (rowIndex !== -1)
         {
-            if(_draggedRowIndexes !== nil)
+            if ([_draggedRowIndexes count] > 0)
             {
-                _draggedRowIndexes = nil;
+                _draggedRowIndexes = [CPIndexSet indexSet];
                 return;
             }
             // if the table has drag support then we use mouseUp to select a single row.
