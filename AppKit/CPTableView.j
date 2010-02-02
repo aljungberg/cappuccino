@@ -123,7 +123,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
 @end
 
-/*! 
+/*!
     @ingroup appkit
     @class CPTableView
 
@@ -189,6 +189,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     _CPTableDrawView _tableDrawView;
 
     SEL         _doubleAction;
+    CPInteger   _clickedRow;
     unsigned    _columnAutoResizingStyle;
 
     BOOL        _verticalMotionCanDrag;
@@ -343,7 +344,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
 /*!
     Reloads the data for all rows and columns.
-    
+
 */
 - (void)reloadData
 {
@@ -377,8 +378,16 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
 /*
     * - clickedColumn
-    * - clickedRow
 */
+
+/*!
+    Returns the index of the the row the user clicked to trigger an action, or -1 if no row was clicked.
+*/
+- (CPInteger)clickedRow
+{
+    return _clickedRow;
+}
+
 //Configuring Behavior
 
 - (void)setAllowsColumnReordering:(BOOL)shouldAllowColumnReordering
@@ -498,7 +507,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
 /*!
     Sets the colors for the rows as they alternate. The number of colors can be arbitrary. By deafult these colors are white and light blue.
-    @param anArray an array of CPColors 
+    @param anArray an array of CPColors
 */
 
 - (void)setAlternatingRowBackgroundColors:(CPArray)alternatingRowBackgroundColors
@@ -617,7 +626,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
 /*!
     Removes a given column from the receiver.
-    @param aTableColumn The column to remove from the receiver. 
+    @param aTableColumn The column to remove from the receiver.
 */
 - (void)removeTableColumn:(CPTableColumn)aTableColumn
 {
@@ -1980,10 +1989,10 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 }
 
 - (void)_drawRect:(CGRect)aRect
-{   
+{
     // FIX ME: All three of these methods will likely need to be rewritten for 1.0
     // We've got grid drawing in highlightSelection and crap everywhere.
-    
+
     var exposedRect = [self _exposedRect];
 
     [self drawBackgroundInClipRect:exposedRect];
@@ -2199,7 +2208,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
             exposedRange = CPMakeRange(firstExposedColumn, [exposedColumns lastIndex] - firstExposedColumn + 1);
             [exposedColumns getIndexes:exposedColumnIndexes maxCount:-1 inIndexRange:exposedRange];
             var exposedColumnCount = [exposedColumnIndexes count];
-            
+
             for(var c = firstExposedColumn; c < exposedColumnCount; c++)
             {
                 //console.log(columnIndexes);
@@ -2478,7 +2487,10 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
     //double click actions
     if([[CPApp currentEvent] clickCount] === 2 && _doubleAction && _target)
+    {
+        _clickedRow = [self rowAtPoint:aPoint];
         [self sendAction:_doubleAction to:_target];
+    }
 }
 
 /*!
