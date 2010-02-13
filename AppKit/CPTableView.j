@@ -729,7 +729,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     if ([_selectedRowIndexes count] > 0)
     {
         [self _updateHighlightWithOldRows:_selectedRowIndexes newRows:[CPIndexSet indexSet]];
-        _selectedRowIndexes = [CPIndexSet indexSet];
+        [self selectRowIndexes:[CPIndexSet indexSet] byExtendingSelection:NO];
     }
 
     var previousSelectedIndexes = [_selectedColumnIndexes copy];
@@ -2987,7 +2987,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 {
     if (aKey == 'selectionIndexes')
     {
-        [self _selectRowIndexes: aValue byExtendingSelection: NO];
+        [self selectRowIndexes: aValue byExtendingSelection: NO];
     }
     else
     {
@@ -2995,20 +2995,23 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     }
 }
 
+- (id)valueForKey:(CPString)aKey
+{
+    if (aKey == 'selectionIndexes')
+    {
+        return [self selectedRowIndexes];
+    }
+    else
+    {
+        return [super valueForKey:aKey];
+    }
+}
+
 - (void)selectRowIndexes:(CPIndexSet)rows byExtendingSelection:(BOOL)shouldExtendSelection
 {
-    var selectionBinding = [self infoForBinding:@"selectionIndexes"];
-    if (selectionBinding)
-    {
-        [self willChangeValueForKey:@"selectionIndexes"];
-    }
-
+    [self willChangeValueForKey:@"selectionIndexes"];
     [self _selectRowIndexes: rows byExtendingSelection: shouldExtendSelection];
-
-    if (selectionBinding)
-    {
-        [self didChangeValueForKey:@"selectionIndexes"];
-    }
+    [self didChangeValueForKey:@"selectionIndexes"];
 }
 
 @end
