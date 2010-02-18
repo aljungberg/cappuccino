@@ -236,7 +236,6 @@ var kvoNewAndOld = CPKeyValueObservingOptionNew|CPKeyValueObservingOptionOld,
     var kvoClass = objj_allocateClassPair(currentClass, kvoClassName);
 
     objj_registerClassPair(kvoClass);
-    _class_initialize(kvoClass);
 
     //copy in the methods from our model subclass
     var methodList = _CPKVOModelSubclass.method_list,
