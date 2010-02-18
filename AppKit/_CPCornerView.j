@@ -11,7 +11,7 @@
     {
         [self setBackgroundColor:[CPColor colorWithPatternImage:CPAppKitImage("tableview-headerview.png", CGSizeMake(1.0, 23.0))]];
     }
-    
+
     return self;
 }
 

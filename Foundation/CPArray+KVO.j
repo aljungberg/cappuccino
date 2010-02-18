@@ -303,7 +303,6 @@
 
 - (id)valueForKey:(CPString)aKey
 {
-
     if (aKey.indexOf("@") === 0)
     {
         if (aKey.indexOf(".") !== -1)
@@ -337,7 +336,7 @@
 - (id)valueForKeyPath:(CPString)aKeyPath
 {
     if (aKeyPath.indexOf("@") === 0)
-    {            
+    {
         var dotIndex = aKeyPath.indexOf("."),
             operator,
             parameter;
@@ -357,21 +356,7 @@
     }
     else
     {
-        var newArray = [],
-            enumerator = [self objectEnumerator],
-            object;
-            
-        while ((object = [enumerator nextObject]) !== nil)
-        {
-            var value = [object valueForKeyPath:aKeyPath];
-            
-            if (value === nil || value === undefined)
-                value = [CPNull null];
-                
-            newArray.push(value);
-        }
-        
-        return newArray;
+        return [super valueForKeyPath:aKeyPath];
     }
 }
 

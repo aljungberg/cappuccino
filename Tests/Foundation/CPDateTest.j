@@ -62,12 +62,44 @@
 
 - (void)testDescription
 {
-    // Unfortunately the result will be different depending on the testing machine's timezone.
-    var expectedHour = 23
-    var expectedMinute = 31;
-    var offsetHours = Math.floor(new Date().getTimezoneOffset() / 60);
-    var offsetMinutes = new Date().getTimezoneOffset() - offsetHours * 60;
-    var expectedString = [CPString stringWithFormat:"2009-02-13 %02d:%02d:30 +%02d%02d", expectedHour-offsetHours, expectedMinute-offsetMinutes, offsetHours, offsetMinutes];
+    // Unfortunately the result will be different depending on the testing machine's timezone, so
+    // this test turns out to be more complex than the code tested. We can't just reuse the
+    // original code as then we'd have exactly the same bugs.
+    var expectedDay = 13,
+        expectedHour = 23,
+        expectedMinute = 31,
+        offsetPositive = new Date().getTimezoneOffset() >= 0,
+        offsetHours = Math.floor(new Date().getTimezoneOffset() / 60),
+        offsetMinutes = new Date().getTimezoneOffset() - offsetHours * 60,
+        expectedString;
+    expectedHour -= offsetHours;
+    expectedMinute -= offsetMinutes;
+    if (expectedMinute < 0)
+    {
+        expectedMinute += 60;
+        expectedHour--;
+    }
+    else if (expectedMinute > 59)
+    {
+        expectedMinute -= 60;
+        expectedHour++;
+    }
+    if (expectedHour < 0)
+    {
+        expectedHour += 24;
+        expectedDay--;
+    }
+    else if (expectedHour > 23)
+    {
+        expectedHour -= 24;
+        expectedDay++;
+    }
+
+    if (offsetPositive)
+        expectedString = [CPString stringWithFormat:"2009-02-%02d %02d:%02d:30 +%02d%02d", expectedDay, expectedHour, expectedMinute, offsetHours, offsetMinutes];
+    else
+        expectedString = [CPString stringWithFormat:"2009-02-%02d %02d:%02d:30 -%02d%02d", expectedDay, expectedHour, expectedMinute, ABS(offsetHours), ABS(offsetMinutes)];
+
     [self assert:expectedString equals: [[CPDate dateWithTimeIntervalSince1970: 1234567890] description]];
 }
 
