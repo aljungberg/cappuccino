@@ -173,6 +173,8 @@ function base64_decode_to_string(input, strip)
     return bytes_to_string(base64_decode_to_array(input, strip));
 }
 
+exports.base64_decode_to_string = base64_decode_to_string
+
 function bytes_to_string(bytes)
 {
     // This is relatively efficient, I think:
@@ -189,6 +191,8 @@ function base64_encode_string(input)
 
     return base64_encode_array(temp);
 }
+
+exports.base64_encode_string = base64_encode_string
 
 exports.CFData = CFData;
 exports.CFMutableData = CFMutableData;
