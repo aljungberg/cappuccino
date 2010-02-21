@@ -168,7 +168,7 @@ function base64_encode_array(input)
     return output.join("");
 }
 
-function base64_decode_to_string(input, strip)
+GLOBAL(base64_decode_to_string) = function(input, strip)
 {
     return bytes_to_string(base64_decode_to_array(input, strip));
 }
