@@ -1,5 +1,5 @@
 
-function CFData()
+GLOBAL(CFData) = function()
 {
     this._encodedString = NULL;
     this._serializedPropertyList = NULL;
@@ -46,7 +46,7 @@ CFData.prototype.base64 = function()
     return this._base64;
 }
 
-function CFMutableData()
+GLOBAL(CFMutableData) = function()
 {
     CFData.call(this);
 }
@@ -173,17 +173,13 @@ function base64_decode_to_string(input, strip)
     return bytes_to_string(base64_decode_to_array(input, strip));
 }
 
-exports.base64_decode_to_string = base64_decode_to_string
-
-function bytes_to_string(bytes)
+GLOBAL(bytes_to_string) = function(bytes)
 {
     // This is relatively efficient, I think:
     return String.fromCharCode.apply(NULL, bytes);
 }
 
-exports.bytes_to_string = bytes_to_string;
-
-function base64_encode_string(input)
+GLOBAL(base64_encode_string) = function(input)
 {
     var temp = [];
     for (var i = 0; i < input.length; i++)
@@ -191,8 +187,3 @@ function base64_encode_string(input)
 
     return base64_encode_array(temp);
 }
-
-exports.base64_encode_string = base64_encode_string
-
-exports.CFData = CFData;
-exports.CFMutableData = CFMutableData;

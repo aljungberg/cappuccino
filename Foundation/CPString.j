@@ -62,7 +62,7 @@ CPNumericSearch         = 64;
 */
 CPDiacriticInsensitiveSearch = 128;
 
-var CPStringHashes      = new CFMutableDictionary();
+var CPStringUIDs        = new CFMutableDictionary();
 
 var CPStringRegexSpecialCharacters = [
       '/', '.', '*', '+', '?', '|', '$', '^',
@@ -538,15 +538,15 @@ var CPStringRegexSpecialCharacters = [
 */
 - (unsigned)UID
 {
-    var hash = CPStringHashes.valueForKey(self);
+    var UID = CPStringUIDs.valueForKey(self);
 
-    if (!hash) 
+    if (!UID)
     {
-        hash = _objj_generateObjectHash();
-        CPStringHashes.setValueForKey(self, hash);
+        UID = objj_generateObjectUID();
+        CPStringUIDs.setValueForKey(self, UID);
     }
 
-    return hash;
+    return UID + "";
 }
 
 /*!
