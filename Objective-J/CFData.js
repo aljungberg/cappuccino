@@ -1,3 +1,24 @@
+/*
+ * CFData.js
+ * Objective-J
+ *
+ * Created by Francisco Tolmasky.
+ * Copyright 2008-2010, 280 North, Inc.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 GLOBAL(CFData) = function()
 {
@@ -101,7 +122,7 @@ var base64_map_to = [
 for (var i = 0; i < base64_map_to.length; i++)
     base64_map_from[base64_map_to[i].charCodeAt(0)] = i;
 
-function base64_decode_to_array(input, strip)
+GLOBAL(base64_decode_to_array) = function(input, strip)
 {
     if (strip)
         input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
@@ -130,7 +151,7 @@ function base64_decode_to_array(input, strip)
     return output;
 }
 
-function base64_encode_array(input)
+GLOBAL(base64_encode_array) = function(input)
 {
     var pad = (3 - (input.length % 3)) % 3,
         length = input.length + pad,

@@ -1044,7 +1044,7 @@ var _CPAppBootstrapperActions = nil;
 {
 }
 
-+ (void)actions
++ (CPArray)actions
 {
     return [@selector(bootstrapPlatform), @selector(loadDefaultTheme), @selector(loadMainCibFile)];
 }
@@ -1079,7 +1079,7 @@ var _CPAppBootstrapperActions = nil;
     return YES;
 }
 
-+ (void)blendDidFinishLoading:(CPBundle)aBundle
++ (void)blendDidFinishLoading:(CPThemeBlend)aThemeBlend
 {
     [CPTheme setDefaultTheme:[CPTheme themeNamed:[CPApplication defaultThemeName]]];
 
