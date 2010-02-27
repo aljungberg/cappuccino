@@ -762,7 +762,8 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     [self _updateHighlightWithOldColumns:previousSelectedIndexes newColumns:_selectedColumnIndexes];
     [_tableDrawView display]; // FIXME: should be setNeedsDisplayInRect:enclosing rect of new (de)selected columns
                               // but currently -drawRect: is not implemented here
-    [_headerView setNeedsDisplay:YES];
+    if (_headerView)
+        [_headerView setNeedsDisplay:YES];
 
     [self _noteSelectionDidChange];
 }
@@ -792,7 +793,8 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     {
         [self _updateHighlightWithOldColumns:_selectedColumnIndexes newColumns:[CPIndexSet indexSet]];
         _selectedColumnIndexes = [CPIndexSet indexSet];
-        [_headerView setNeedsDisplay:YES];
+        if (_headerView)
+            [_headerView setNeedsDisplay:YES];
     }
 
     var previousSelectedIndexes = [_selectedRowIndexes copy];
@@ -873,8 +875,11 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
             [dataView unsetThemeState:CPThemeStateHighlighted];
         }
 
-        var headerView = [_tableColumns[columnIndex] headerView];
-        [headerView unsetThemeState:CPThemeStateHighlighted];
+        if (_headerView)
+        {
+            var headerView = [_tableColumns[columnIndex] headerView];
+            [headerView unsetThemeState:CPThemeStateHighlighted];
+        }
     }
 
     count = selectColumns.length;
@@ -891,8 +896,11 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
             [dataView setThemeState:CPThemeStateHighlighted];
         }
 
-        var headerView = [_tableColumns[columnIndex] headerView];
-        [headerView setThemeState:CPThemeStateHighlighted];
+        if (_headerView)
+        {
+            var headerView = [_tableColumns[columnIndex] headerView];
+            [headerView setThemeState:CPThemeStateHighlighted];
+        }
     }
 }
 
@@ -1762,11 +1770,14 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     if (_currentHighlightedTableColumn == aTableColumn)
         return;
 
-    if (_currentHighlightedTableColumn != nil)
-        [[_currentHighlightedTableColumn headerView] unsetThemeState:CPThemeStateHighlighted];
+    if (_headerView)
+    {
+        if (_currentHighlightedTableColumn != nil)
+            [[_currentHighlightedTableColumn headerView] unsetThemeState:CPThemeStateHighlighted];
 
-    if (aTableColumn != nil)
-        [[aTableColumn headerView] setThemeState:CPThemeStateHighlighted];
+        if (aTableColumn != nil)
+            [[aTableColumn headerView] setThemeState:CPThemeStateHighlighted];
+    }
 
     _currentHighlightedTableColumn = aTableColumn;
 }
