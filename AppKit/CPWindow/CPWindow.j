@@ -1799,7 +1799,7 @@ CPTexturedBackgroundWindowMask
 */
 - (void)makeMainWindow
 {
-    if (![self canBecomeMainWindow])
+    if (CPApp._mainWindow === self || ![self canBecomeMainWindow])
         return;
 
     [CPApp._mainWindow resignMainWindow];
