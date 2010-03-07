@@ -229,19 +229,6 @@
     if (shouldShowHorizontalScroller)
         contentFrame.size.height -= horizontalScrollerHeight;
 
-    var _window = [self window],
-        forceCornerSpace = NO;
-
-    if (_window && [_window contentView])
-    {
-        var windowIsResizable = !!(([_window styleMask] & CPResizableWindowMask) || ([_window styleMask] & CPBorderlessBridgeWindowMask)),
-            relativeFrame = [self convertRect:[[_window contentView] frame] fromView:nil],
-            maxPoint = CGPointMake(CGRectGetMaxX([self bounds]), CGRectGetMaxY([self bounds])),
-            isInWindowCorner = CGRectGetMaxX(relativeFrame) >= maxPoint.x && CGRectGetMaxY(relativeFrame) >= maxPoint.y;
-
-        forceCornerSpace = windowIsResizable && isInWindowCorner;
-    }
-
     var scrollPoint = [_contentView bounds].origin,
         wasShowingVerticalScroller = ![_verticalScroller isHidden],
         wasShowingHorizontalScroller = ![_horizontalScroller isHidden];
@@ -251,7 +238,7 @@
         var verticalScrollerY = MAX(_CGRectGetHeight([self _cornerViewFrame]), headerClipViewHeight),
             verticalScrollerHeight = _CGRectGetHeight([self bounds]) - verticalScrollerY;
 
-        if (forceCornerSpace || shouldShowHorizontalScroller)
+        if (shouldShowHorizontalScroller)
             verticalScrollerHeight -= horizontalScrollerHeight;
 
         [_verticalScroller setFloatValue:(difference.height <= 0.0) ? 0.0 : scrollPoint.y / difference.height];
@@ -268,7 +255,7 @@
     {
         [_horizontalScroller setFloatValue:(difference.width <= 0.0) ? 0.0 : scrollPoint.x / difference.width];
         [_horizontalScroller setKnobProportion:_CGRectGetWidth(contentFrame) / _CGRectGetWidth(documentFrame)];
-        [_horizontalScroller setFrame:_CGRectMake(0.0, _CGRectGetMaxY(contentFrame), _CGRectGetWidth(contentFrame) - ((!shouldShowVerticalScroller && forceCornerSpace) ? verticalScrollerWidth : 0), horizontalScrollerHeight)];
+        [_horizontalScroller setFrame:_CGRectMake(0.0, _CGRectGetMaxY(contentFrame), _CGRectGetWidth(contentFrame), horizontalScrollerHeight)];
     }
     else if (wasShowingHorizontalScroller)
     {
@@ -696,46 +683,51 @@
 
 - (void)keyDown:(CPEvent)anEvent
 {
-    var keyCode = [anEvent keyCode],
-        documentFrame = [[self documentView] frame],
+    [self interpretKeyEvents:[anEvent]];
+}
+
+- (void)pageUp:(id)sender
+{
+    var contentBounds = [_contentView bounds];
+    [self moveByOffset:CGSizeMake(0.0, -(_CGRectGetHeight(contentBounds) - _verticalPageScroll))];
+}
+
+- (void)pageDown:(id)sender
+{
+    var contentBounds = [_contentView bounds];
+    [self moveByOffset:CGSizeMake(0.0, _CGRectGetHeight(contentBounds) - _verticalPageScroll)];
+}
+
+- (void)moveLeft:(id)sender
+{
+    [self moveByOffset:CGSizeMake(-_horizontalLineScroll, 0.0)];
+}
+
+- (void)moveRight:(id)sender
+{
+    [self moveByOffset:CGSizeMake(_horizontalLineScroll, 0.0)];
+}
+
+- (void)moveUp:(id)sender
+{
+    [self moveByOffset:CGSizeMake(0.0, -_verticalLineScroll)];
+}
+
+- (void)moveDown:(id)sender
+{
+    [self moveByOffset:CGSizeMake(0.0, _verticalLineScroll)];
+}
+
+- (void)moveByOffset:(CGSize)aSize
+{
+    var documentFrame = [[self documentView] frame],
         contentBounds = [_contentView bounds];
-    
-    switch (keyCode)
-    {
-        case 33:    /*pageup*/
-                    contentBounds.origin.y -= _CGRectGetHeight(contentBounds) - _verticalPageScroll;
-                    break;
-                    
-        case 34:    /*pagedown*/
-                    contentBounds.origin.y += _CGRectGetHeight(contentBounds) - _verticalPageScroll;
-                    break;
-                    
-        case 38:    /*up arrow*/
-                    contentBounds.origin.y -= _verticalLineScroll;
-                    break;
 
-        case 40:    /*down arrow*/
-                    contentBounds.origin.y += _verticalLineScroll;
-                    break;
-                    
-        case 37:    /*left arrow*/
-                    contentBounds.origin.x -= _horizontalLineScroll;
-                    break;
-
-        case 49:    /*right arrow*/
-                    contentBounds.origin.x += _horizontalLineScroll;
-                    break;
-                    
-        default:    return [super keyDown:anEvent];
-    }
+    contentBounds.origin.x += aSize.width;
+    contentBounds.origin.y += aSize.height;
 
     [_contentView scrollToPoint:contentBounds.origin];
     [_headerClipView scrollToPoint:CGPointMake(contentBounds.origin, 0)];
-}
-
-- (void)viewDidMoveToWindow
-{
-    [self reflectScrolledClipView:_contentView];
 }
 
 @end
