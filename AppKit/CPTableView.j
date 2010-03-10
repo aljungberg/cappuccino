@@ -1851,6 +1851,9 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
             [dataView setFrame:[self frameOfDataViewAtColumn:column row:row]];
             [dataView setObjectValue:[self _objectValueForTableColumn:tableColumn row:row]];
 
+            // If the column uses content bindings, allow them to override the objectValueForTableColumn.
+            [tableColumn prepareDataView:dataView forRow:row];
+
             [view addSubview:dataView];
         }
     }
