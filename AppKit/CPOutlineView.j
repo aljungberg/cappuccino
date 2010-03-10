@@ -476,7 +476,6 @@ CPOutlineViewDropOnItemIndex = -1;
 
     _outlineViewDelegate = aDelegate;
     _implementedOutlineViewDelegateMethods = 0;
-<<<<<<< HEAD
 
     if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:dataCellForTableColumn:item:)])
         _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_dataCellForTableColumn_item_;
@@ -550,21 +549,6 @@ CPOutlineViewDropOnItemIndex = -1;
     if ([_outlineViewDelegate respondsToSelector:@selector(selectionShouldChangeInOutlineView:)])
         _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_selectionShouldChangeInOutlineView_;
 
-=======
-
-    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:dataViewForTableColumn:item:)])
-        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_dataViewForTableColumn_item_;
-
-    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:shouldSelectItem:)])
-        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_shouldSelectItem_;
-
-    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:heightOfRowByItem:)])
-        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_heightOfRowByItem_;
-
-    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:willDisplayView:forTableColumn:item:)])
-        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_willDisplayView_forTableColumn_item_;
-
->>>>>>> aff488322221e8e90c07396484ae99f7aac4827c
     if ([_outlineViewDelegate respondsToSelector:@selector(outlineViewColumnDidMove:)])
         [defaultCenter
             addObserver:_outlineViewDelegate
@@ -1076,17 +1060,6 @@ var _loadItemInfoForItem = function(/*CPOutlineView*/ anOutlineView, /*id*/ anIt
     return self;
 }
 
-<<<<<<< HEAD
-- (BOOL)tableView:(CPTableView)aTableView shouldSelectRow:(CPInteger)aRow
-{
-    if (_outlineView._implementedOutlineViewDelegateMethods & CPOutlineViewDelegate_outlineView_shouldSelectItem_)
-    {
-        return [_outlineView._outlineViewDelegate outlineView:self shouldSelectItem:[_outlineView itemAtRow:aRow]];
-    }
-    return YES;
-}
-
-=======
 - (CPView)tableView:(CPTableView)theTableView dataViewForTableColumn:(CPTableColumn)theTableColumn row:(int)theRow
 {
     var dataView = nil;
@@ -1127,9 +1100,14 @@ var _loadItemInfoForItem = function(/*CPOutlineView*/ anOutlineView, /*id*/ anIt
     }
 }
 
+- (BOOL)tableView:(CPTableView)aTableView isGroupRow:(int)row
+{
+    if ((_outlineView._implementedOutlineViewDelegateMethods & CPOutlineViewDelegate_outlineView_isGroupItem_))
+        return [_outlineView._outlineViewDelegate outlineView:_outlineView isGroupItem:[_outlineView itemAtRow:theRow]];
 
+    return NO;
+}
 
->>>>>>> aff488322221e8e90c07396484ae99f7aac4827c
 @end
 
 @implementation CPDisclosureButton : CPButton

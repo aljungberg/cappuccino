@@ -976,10 +976,9 @@ CPRunContinuesResponse  = -1002;
    [self endSheet:sheet returnCode:0];
 }
 
-
 - (CPArray)arguments
 {
-    if(_fullArgsString != window.location.hash)
+    if(_fullArgsString !== window.location.hash)
         [self _reloadArguments];
 
     return _args;
@@ -1012,12 +1011,18 @@ CPRunContinuesResponse  = -1002;
 - (void)_reloadArguments
 {
     _fullArgsString = window.location.hash;
-    var args = _fullArgsString.replace("#", "").split("/").slice(0);
 
-    for(var i=0, count = args.length; i<count; i++)
-        args[i] = decodeURIComponent(args[i]);
+    if (_fullArgsString.length)
+    {
+        var args = _fullArgsString.substring(1).split("/");
 
-    _args = args;
+        for (var i = 0, count = args.length; i < count; i++)
+            args[i] = decodeURIComponent(args[i]);
+
+        _args = args;
+    }
+    else
+        _args = [];
 }
 
 - (CPDictionary)namedArguments
@@ -1146,29 +1151,8 @@ function CPApplicationMain(args, namedArgs)
 
     [principalClass sharedApplication];
 
-    //FIXME?
-    if (!args)
-    {
-        var args = [CPApp arguments];
-
-        if([args containsObject:"debug"])
-            CPLogRegister(CPLogPopup);
-    }
-
-    if (!namedArgs)
-    {
-        var searchParams = window.location.search.substring(1).split("&");
-            namedArgs = [CPDictionary dictionary];
-
-        for(var i=0; i<searchParams.length; i++)
-        {
-            var index = searchParams[i].indexOf('=');
-            if(index == -1)
-                [namedArgs setObject: "" forKey:searchParams[i]];
-            else
-                [namedArgs setObject: searchParams[i].substring(index+1) forKey: searchParams[i].substring(0, index)];
-        }
-    }
+    if ([args containsObject:"debug"])
+        CPLogRegister(CPLogPopup);
 
     CPApp._args = args;
     CPApp._namedArgs = namedArgs;
