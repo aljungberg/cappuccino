@@ -202,10 +202,11 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     unsigned    _destinationDragStyle;
     BOOL        _isSelectingSession;
     CPIndexSet  _draggedRowIndexes;
-    _dropOperationDrawingView _dropOperationFeedbackView;
-    CPDragOperation _dragOperationDefaultMask;
-    int         _retargetedDropRow;
-    CPDragOperation _retargetedDropOperation;
+
+    _CPDropOperationDrawingView _dropOperationFeedbackView;
+    CPDragOperation             _dragOperationDefaultMask;
+    int                         _retargetedDropRow;
+    CPDragOperation             _retargetedDropOperation;
 
     BOOL        _disableAutomaticResizing @accessors(property=disableAutomaticResizing);
     BOOL        _lastColumnShouldSnap;
@@ -279,7 +280,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
         _retargetedDropOperation = nil;
         _dragOperationDefaultMask = nil;
         _destinationDragStyle = CPTableViewDraggingDestinationFeedbackStyleRegular;
-        _dropOperationFeedbackView = [[_dropOperationDrawingView alloc] initWithFrame:_CGRectMakeZero()];
+        _dropOperationFeedbackView = [[_CPDropOperationDrawingView alloc] initWithFrame:_CGRectMakeZero()];
         [self addSubview:_dropOperationFeedbackView];
         [_dropOperationFeedbackView setHidden:YES];
         [_dropOperationFeedbackView setTableView:self];
@@ -1803,59 +1804,38 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     return YES;
 }
 
-- (CPImage)dragImageForRowsWithIndexes:(CPIndexSet)dragRows
-                          tableColumns:(CPArray)theTableColumns
-                                 event:(CPEvent)dragEvent
-                                offset:(CPPointPointer)dragImageOffset
+- (CPImage)dragImageForRowsWithIndexes:(CPIndexSet)dragRows tableColumns:(CPArray)theTableColumns event:(CPEvent)dragEvent offset:(CPPointPointer)dragImageOffset
 {
     return [[CPImage alloc] initWithContentsOfFile:@"Frameworks/AppKit/Resources/GenericFile.png" size:CGSizeMake(32,32)];
 }
 
-- (CPView)dragViewForRowsWithIndexes:(CPIndexSet)theDraggedRows
-                        tableColumns:(CPArray)theTableColumns
-                               event:(CPEvent)theDragEvent
-                              offset:(CPPoint)dragViewOffset
+
+- (CPView)dragViewForRowsWithIndexes:(CPIndexSet)theDraggedRows tableColumns:(CPArray)theTableColumns event:(CPEvent)theDragEvent offset:(CPPoint)dragViewOffset
 {
     var bounds = [self bounds],
         view = [[CPView alloc] initWithFrame:bounds];
 
-    [view setBackgroundColor:[CPColor clearColor]];
     [view setAlphaValue:0.7];
 
     // We have to fetch all the data views for the selected rows and columns
     // After that we can copy these add them to a transparent drag view and use that drag view
     // to make it appear we are dragging images of those rows (as you would do in regular Cocoa)
-    var firstExposedColumn = [_exposedColumns firstIndex],
-        firstExposedRow = [_exposedRows firstIndex],
-        exposedColumnsLength = [_exposedColumns lastIndex] - firstExposedColumn + 1,
-        exposedRowsLength = [_exposedRows lastIndex] - firstExposedRow + 1,
-        columns = [],
-        rows = [];
-
-    [_exposedColumns getIndexes:columns maxCount:-1 inIndexRange:CPMakeRange(firstExposedColumn, exposedColumnsLength)];
-    [theDraggedRows getIndexes:rows maxCount:-1 inIndexRange:CPMakeRange(firstExposedRow, exposedRowsLength)];
-
-    var columnIndex = [columns count];
-
+    var columnIndex = [theTableColumns count];
     while (columnIndex--)
     {
-        var column = columns[columnIndex],
-            tableColumn = [_tableColumns objectAtIndex:column],
-            rowIndex = [rows count];
+        var tableColumn = [theTableColumns objectAtIndex:columnIndex],
+            row = [theDraggedRows firstIndex];
 
-        while (rowIndex--)
+        while (row !== CPNotFound)
         {
-            var row = rows[rowIndex];
             var dataView = [self _newDataViewForRow:row tableColumn:tableColumn];
 
-            [dataView setBackgroundColor:[CPColor clearColor]];
-            [dataView setFrame:[self frameOfDataViewAtColumn:column row:row]];
+            [dataView setFrame:[self frameOfDataViewAtColumn:columnIndex row:row]];
             [dataView setObjectValue:[self _objectValueForTableColumn:tableColumn row:row]];
 
-            // If the column uses content bindings, allow them to override the objectValueForTableColumn.
-            [tableColumn prepareDataView:dataView forRow:row];
-
             [view addSubview:dataView];
+
+            row = [theDraggedRows indexGreaterThanIndex:row];
         }
     }
 
@@ -3248,6 +3228,7 @@ var CPTableViewDataSourceKey                = @"CPTableViewDataSourceKey",
     CPTableViewGridColorKey                 = @"CPTableViewGridColorKey",
     CPTableViewGridStyleMaskKey             = @"CPTableViewGridStyleMaskKey",
     CPTableViewUsesAlternatingBackgroundKey = @"CPTableViewUsesAlternatingBackgroundKey",
+    CPTableViewAlternatingRowColorsKey      = @"CPTableViewAlternatingRowColorsKey",
     CPTableViewHeaderViewKey                = @"CPTableViewHeaderViewKey",
     CPTableViewCornerViewKey                = @"CPTableViewCornerViewKey";
 
@@ -3348,6 +3329,9 @@ var CPTableViewDataSourceKey                = @"CPTableViewDataSourceKey",
         _gridColor = [aCoder decodeObjectForKey:CPTableViewGridColorKey] || [CPColor grayColor];
         _gridStyleMask = [aCoder decodeIntForKey:CPTableViewGridStyleMaskKey] || CPTableViewGridNone;
 
+        _alternatingRowBackgroundColors = [aCoder decodeObjectForKey:CPTableViewAlternatingRowColorsKey];
+        _usesAlternatingRowBackgroundColors = [aCoder decodeObjectForKey:CPTableViewUsesAlternatingBackgroundKey]
+
         _headerView = [aCoder decodeObjectForKey:CPTableViewHeaderViewKey];
         _cornerView = [aCoder decodeObjectForKey:CPTableViewCornerViewKey];
 
@@ -3390,6 +3374,7 @@ var CPTableViewDataSourceKey                = @"CPTableViewDataSourceKey",
     [aCoder encodeInt:_gridStyleMask forKey:CPTableViewGridStyleMaskKey];
 
     [aCoder encodeBool:_usesAlternatingRowBackgroundColors forKey:CPTableViewUsesAlternatingBackgroundKey];
+    [aCoder encodeObject:_alternatingRowBackgroundColors forKey:CPTableViewAlternatingRowColorsKey]
 
     [aCoder encodeObject:_cornerView forKey:CPTableViewCornerViewKey];
     [aCoder encodeObject:_headerView forKey:CPTableViewHeaderViewKey];
@@ -3434,7 +3419,7 @@ var CPTableViewDataSourceKey                = @"CPTableViewDataSourceKey",
 
 @end
 
-@implementation _dropOperationDrawingView : CPView
+@implementation _CPDropOperationDrawingView : CPView
 {
     unsigned    dropOperation @accessors;
     CPTableView tableView @accessors;

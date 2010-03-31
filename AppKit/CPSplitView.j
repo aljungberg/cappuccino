@@ -212,6 +212,7 @@ var CPSplitViewHorizontalImage = nil,
     if (!_DOMDividerElements[_drawingDivider])
     {
         _DOMDividerElements[_drawingDivider] = document.createElement("div");
+
         _DOMDividerElements[_drawingDivider].style.position = "absolute";
         _DOMDividerElements[_drawingDivider].style.backgroundRepeat = "repeat";
 
@@ -431,6 +432,12 @@ var CPSplitViewHorizontalImage = nil,
 - (void)_updateResizeCursor:(CPEvent)anEvent
 {
     var point = [self convertPoint:[anEvent locationInWindow] fromView:nil];
+
+    if ([anEvent type] === CPLeftMouseUp && ![[self window] acceptsMouseMovedEvents])
+    {
+        [[CPCursor arrowCursor] set];
+        return;
+    }
 
     for (var i = 0, count = [_subviews count] - 1; i < count; i++)
     {

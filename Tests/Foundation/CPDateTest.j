@@ -65,12 +65,13 @@
     // Unfortunately the result will be different depending on the testing machine's timezone, so
     // this test turns out to be more complex than the code tested. We can't just reuse the
     // original code as then we'd have exactly the same bugs.
-    var expectedDay = 13,
+    var date = [CPDate dateWithTimeIntervalSince1970: 1234567890],
+        expectedDay = 13,
         expectedHour = 23,
         expectedMinute = 31,
-        offsetPositive = new Date().getTimezoneOffset() >= 0,
-        offsetHours = Math.floor(new Date().getTimezoneOffset() / 60),
-        offsetMinutes = new Date().getTimezoneOffset() - offsetHours * 60,
+        offsetPositive = date.getTimezoneOffset() >= 0,
+        offsetHours = Math.floor(date.getTimezoneOffset() / 60),
+        offsetMinutes = date.getTimezoneOffset() - offsetHours * 60,
         expectedString;
     expectedHour -= offsetHours;
     expectedMinute -= offsetMinutes;
@@ -100,7 +101,7 @@
     else
         expectedString = [CPString stringWithFormat:"2009-02-%02d %02d:%02d:30 -%02d%02d", expectedDay, expectedHour, expectedMinute, ABS(offsetHours), ABS(offsetMinutes)];
 
-    [self assert:expectedString equals: [[CPDate dateWithTimeIntervalSince1970: 1234567890] description]];
+    [self assert:expectedString equals: [date description]];
 }
 
 - (void)testCopy

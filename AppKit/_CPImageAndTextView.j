@@ -332,7 +332,8 @@ var HORIZONTAL_MARGIN   = 3.0,
         hasDOMTextElement = !!_DOMTextElement;
     
     // Create or destroy the DOM Text Element as necessary
-    if (needsDOMTextElement !== hasDOMTextElement)    
+    if (needsDOMTextElement !== hasDOMTextElement)
+    {
         if (hasDOMTextElement)
         {
             _DOMElement.removeChild(_DOMTextElement);
@@ -361,6 +362,7 @@ var HORIZONTAL_MARGIN   = 3.0,
             // We have to set all these values now.
             _flags |= _CPImageAndTextViewTextChangedFlag | _CPImageAndTextViewFontChangedFlag | _CPImageAndTextViewLineBreakModeChangedFlag;
         }
+    }
     
     var textStyle = hasDOMTextElement ? _DOMTextElement.style : nil;
     
@@ -369,6 +371,7 @@ var HORIZONTAL_MARGIN   = 3.0,
         hasDOMTextShadowElement = !!_DOMTextShadowElement;
     
     if (needsDOMTextShadowElement !== hasDOMTextShadowElement)
+    {
         if (hasDOMTextShadowElement)
         {
             _DOMElement.removeChild(_DOMTextShadowElement);
@@ -386,6 +389,7 @@ var HORIZONTAL_MARGIN   = 3.0,
             shadowStyle.font = [_font ? _font : [CPFont systemFontOfSize:12.0] cssString];
             shadowStyle.position = "absolute";
             shadowStyle.whiteSpace = textStyle.whiteSpace;
+            shadowStyle.wordWrap = textStyle.wordWrap;
             shadowStyle.color = [_textShadowColor cssString];
 
             shadowStyle.zIndex = 150;
@@ -394,7 +398,6 @@ var HORIZONTAL_MARGIN   = 3.0,
             if (document.attachEvent)
             {
                 shadowStyle.overflow = textStyle.overflow;
-                shadowStyle.wordWrap = textStyle.wordWrap;
             }
             else
             {
@@ -408,6 +411,7 @@ var HORIZONTAL_MARGIN   = 3.0,
             
             _flags |= _CPImageAndTextViewTextChangedFlag; //sigh...
         }
+    }
         
     var shadowStyle = hasDOMTextShadowElement ? _DOMTextShadowElement.style : nil;
         
@@ -447,9 +451,7 @@ var HORIZONTAL_MARGIN   = 3.0,
                 case CPLineBreakByClipping:         textStyle.overflow = "hidden";
                                                     textStyle.textOverflow = "clip";
                                                     textStyle.whiteSpace = "pre";
-                                                    
-                                                    if (document.attachEvent)
-                                                        textStyle.wordWrap = "normal"; 
+                                                    textStyle.wordWrap = "normal"; 
                                                     
                                                     break;
                 
@@ -459,25 +461,22 @@ var HORIZONTAL_MARGIN   = 3.0,
                 case CPLineBreakByTruncatingTail:   textStyle.textOverflow = "ellipsis";
                                                     textStyle.whiteSpace = "nowrap";
                                                     textStyle.overflow = "hidden";
-                                                    
-                                                    if (document.attachEvent)
-                                                        textStyle.wordWrap = "normal"; 
+                                                    textStyle.wordWrap = "normal"; 
                                                                      
                                                     break;
                      
                 case CPLineBreakByCharWrapping:                               
-                case CPLineBreakByWordWrapping:     if (document.attachEvent)
-                                                    {                                            
+                case CPLineBreakByWordWrapping:     textStyle.wordWrap = "break-word";
+                                                    try {
                                                         textStyle.whiteSpace = "pre";
-                                                        textStyle.wordWrap = "break-word";
-                                                    }
-                                                    
-                                                    else
-                                                    {
                                                         textStyle.whiteSpace = "-o-pre-wrap";
                                                         textStyle.whiteSpace = "-pre-wrap";
                                                         textStyle.whiteSpace = "-moz-pre-wrap";
                                                         textStyle.whiteSpace = "pre-wrap";
+                                                    }
+                                                    catch (e) {
+                                                        //internet explorer doesn't like these properties
+                                                        textStyle.whiteSpace = "pre";
                                                     }
                                                     
                                                     textStyle.overflow = "hidden";
@@ -490,7 +489,6 @@ var HORIZONTAL_MARGIN   = 3.0,
             {
                 if (document.attachEvent)
                 {
-                    shadowStyle.wordWrap = textStyle.wordWrap;            
                     shadowStyle.overflow = textStyle.overflow;
                 }
                 else
@@ -499,6 +497,7 @@ var HORIZONTAL_MARGIN   = 3.0,
                     shadowStyle.overflowY = textStyle.overflowY;
                 }
 
+                shadowStyle.wordWrap = textStyle.wordWrap;
                 shadowStyle.whiteSpace = textStyle.whiteSpace;
                 shadowStyle.textOverflow = textStyle.textOverflow;
             }
@@ -510,6 +509,7 @@ var HORIZONTAL_MARGIN   = 3.0,
 
     // Create or destroy DOM Image element    
     if (needsDOMImageElement !== hasDOMImageElement)
+    {
         if (hasDOMImageElement)
         {
             _DOMElement.removeChild(_DOMImageElement);
@@ -539,8 +539,8 @@ var HORIZONTAL_MARGIN   = 3.0,
             _DOMElement.appendChild(_DOMImageElement);
             
             hasDOMImageElement = YES;
-        }    
-#endif
+        }
+    }
 
     var size = [self bounds].size,
         textRect = _CGRectMake(0.0, 0.0, size.width, size.height);
@@ -572,60 +572,47 @@ var HORIZONTAL_MARGIN   = 3.0,
             imageHeight *= scale;
         }
 
-#if PLATFORM(DOM)
         _DOMImageElement.width = imageWidth;
         _DOMImageElement.height = imageHeight;        
         imageStyle.width = imageWidth + "px";
         imageStyle.height = imageHeight + "px";
-#endif
 
         if (_imagePosition === CPImageBelow)
         {
-#if PLATFORM(DOM)
             imageStyle.left = FLOOR(centerX - imageWidth / 2.0) + "px";
             imageStyle.top = FLOOR(size.height - imageHeight) + "px";
-#endif
 
             textRect.size.height = size.height - imageHeight - VERTICAL_MARGIN;
         }
         else if (_imagePosition === CPImageAbove)
         {
-#if PLATFORM(DOM)
             CPDOMDisplayServerSetStyleLeftTop(_DOMImageElement, NULL, FLOOR(centerX - imageWidth / 2.0), 0);
-#endif
             
             textRect.origin.y += imageHeight + VERTICAL_MARGIN;
             textRect.size.height = size.height - imageHeight - VERTICAL_MARGIN;
         }
         else if (_imagePosition === CPImageLeft)
         {
-#if PLATFORM(DOM)
             imageStyle.top = FLOOR(centerY - imageHeight / 2.0) + "px";
             imageStyle.left = "0px";
-#endif
 
             textRect.origin.x = imageWidth + HORIZONTAL_MARGIN;
             textRect.size.width -= imageWidth + HORIZONTAL_MARGIN;
         }
         else if (_imagePosition === CPImageRight)
         {
-#if PLATFORM(DOM)
             imageStyle.top = FLOOR(centerY - imageHeight / 2.0) + "px";
             imageStyle.left = FLOOR(size.width - imageWidth) + "px";
-#endif
 
             textRect.size.width -= imageWidth + HORIZONTAL_MARGIN;
         }
         else if (_imagePosition === CPImageOnly)
         {
-#if PLATFORM(DOM)
             imageStyle.top = FLOOR(centerY - imageHeight / 2.0) + "px";
             imageStyle.left = FLOOR(centerX - imageWidth / 2.0) + "px";
-#endif
         }
     }
 
-#if PLATFORM(DOM)
     if (hasDOMTextElement)
     {
         var textRectX = _CGRectGetMinX(textRect),
