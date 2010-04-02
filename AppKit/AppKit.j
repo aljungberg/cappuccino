@@ -77,6 +77,7 @@
 @import "CPTableColumn.j"
 @import "CPTableView.j"
 @import "CPTextField.j"
+@import "CPTokenField.j"
 @import "CPToolbar.j"
 @import "CPToolbarItem.j"
 @import "CPTreeNode.j"
