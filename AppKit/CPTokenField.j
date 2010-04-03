@@ -386,6 +386,11 @@ var CPTokenFieldTableColumnIdentifier = @"CPTokenFieldTableColumnIdentifier";
 		return;
 	}
 
+	if ([aValue equals:[super objectValue]])
+	{
+	    return;
+	}
+
 	var objectValue = [aValue copy];
 
 	// Because we do not know for sure which tokens are removed we remove them all
@@ -407,7 +412,18 @@ var CPTokenFieldTableColumnIdentifier = @"CPTokenFieldTableColumnIdentifier";
 		[self addSubview:tokenView];
 	}
 
-	[super setObjectValue:objectValue];
+    /*
+    [CPTextField setObjectValue] will try to set the _inputElement.value to
+    the new objectValue, if the _inputElement exists. This is wrong for us
+    since our objectValue is an array of tokens, so we can't use
+    [super setObjectValue:objectValue];
+
+    Instead do what CPControl setObjectValue would.
+    */
+    _value = anObject;
+
+    [self setNeedsLayout];
+    [self setNeedsDisplay:YES];
 }
 
 // Incredible hack to disable supers implementation
@@ -959,8 +975,9 @@ _CPTokenFieldActiveTokenDeleteImageHighlighted = [[CPImage alloc] initByReferenc
 	[super layoutSubviews];
 
 	var bezelView = [self layoutEphemeralSubviewNamed:@"bezel-view"
-	                                           positioned:CPWindowBelow
-	                      relativeToEphemeralSubviewNamed:@"content-view"];
+                                           positioned:CPWindowBelow
+                      relativeToEphemeralSubviewNamed:@"content-view"];
+
     if (bezelView)
 	{
 		[_deleteButton setTarget:self];
