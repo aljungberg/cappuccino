@@ -681,7 +681,7 @@
     if (self === anArray)
         return YES;
 
-    if(length != anArray.length)
+    if (anArray === nil || length != anArray.length)
         return NO;
 
     var index = 0,

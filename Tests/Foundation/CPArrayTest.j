@@ -208,6 +208,7 @@
     array = [];
     [array insertObject: 3 inArraySortedByDescriptors:descriptors];
     [self assert:[3] equals:array];
+}
 
 - (void)testInitWithArrayCopyItems
 {
@@ -215,6 +216,16 @@
     var b = [[CPArray alloc] initWithArray:a copyItems:YES];
 
     [self assert:a notEqual:b];
+}
+
+- (void)testIsEqualToArray
+{
+    var a = [1, 2, 3],
+        b = [5];
+
+    [self assertTrue:[a isEqualToArray:a]];
+    [self assertFalse:[a isEqualToArray:b]];
+    [self assertFalse:[a isEqualToArray:nil]];
 }
 
 @end
