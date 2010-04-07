@@ -280,10 +280,6 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
         _retargetedDropOperation = nil;
         _dragOperationDefaultMask = nil;
         _destinationDragStyle = CPTableViewDraggingDestinationFeedbackStyleRegular;
-        _dropOperationFeedbackView = [[_CPDropOperationDrawingView alloc] initWithFrame:_CGRectMakeZero()];
-        [self addSubview:_dropOperationFeedbackView];
-        [_dropOperationFeedbackView setHidden:YES];
-        [_dropOperationFeedbackView setTableView:self];
 
         _tableDrawView = [[_CPTableDrawView alloc] initWithTableView:self];
         [_tableDrawView setBackgroundColor:[CPColor clearColor]];
@@ -298,6 +294,9 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 // FIX ME: we have a lot of redundent init stuff in initWithFrame: and initWithCoder: we should move it all into here.
 - (void)_init
 {
+        _dropOperationFeedbackView = [[_CPDropOperationDrawingView alloc] initWithFrame:_CGRectMakeZero()];
+        [_dropOperationFeedbackView setTableView:self];
+
         _lastColumnShouldSnap = NO;
         _backgroundColor = [CPColor whiteColor];
 
@@ -2802,7 +2801,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 */
 - (void)draggingExited:(id)sender
 {
-    [_dropOperationFeedbackView setHidden:YES];
+    [_dropOperationFeedbackView removeFromSuperview];
 }
 
 /*
@@ -2818,7 +2817,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     _retargetedDropOperation = nil;
     _retargetedDropRow = nil;
     _draggedRowIndexes = [CPIndexSet indexSet];
-    [_dropOperationFeedbackView setHidden:YES];
+    [_dropOperationFeedbackView removeFromSuperview];
 }
 /*
     @ignore
@@ -2952,7 +2951,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 {
     // FIX ME: is there anything else that needs to happen here?
     // actual validation is called in dragginUpdated:
-    [_dropOperationFeedbackView setHidden:YES];
+    [_dropOperationFeedbackView removeFromSuperview];
 
     return (_implementedDataSourceMethods & CPTableViewDataSource_tableView_validateDrop_proposedRow_proposedDropOperation_);
 }
