@@ -681,7 +681,7 @@
     if (self === anArray)
         return YES;
 
-    if (anArray === nil || length != anArray.length)
+    if (anArray === nil || length !== anArray.length)
         return NO;
 
     var index = 0,
@@ -1006,6 +1006,28 @@
 
     for (; index < objectsCount; ++index, currentIndex = [indexes indexGreaterThanIndex:currentIndex])
         [self insertObject:objects[index] atIndex:currentIndex];
+}
+
+- (unsigned)insertObject:(id)anObject inArraySortedByDescriptors:(CPArray)descriptors
+{
+    var index = [self _indexOfObject:anObject sortedByFunction:function(lhs, rhs)
+    {
+        var i = 0,
+            count = [descriptors count],
+            result = CPOrderedSame;
+
+        while (i < count)
+            if((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
+                return result;
+
+        return result;
+    } context:nil];
+
+    if (index < 0)
+        index = -index-1;
+
+    [self insertObject:anObject atIndex:index];
+    return index;
 }
 
 /*!
