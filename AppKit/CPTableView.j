@@ -228,6 +228,14 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 */
 }
 
++ (void)initialize
+{
+    if (self !== [CPTableView class])
+        return;
+
+    [self exposeBinding:@"content"];
+}
+
 - (id)initWithFrame:(CGRect)aFrame
 {
     self = [super initWithFrame:aFrame];
