@@ -234,6 +234,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
         return;
 
     [self exposeBinding:@"content"];
+    [self exposeBinding:@"selectionIndexes"];
 }
 
 - (id)initWithFrame:(CGRect)aFrame
@@ -901,6 +902,8 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
         (([rows firstIndex] != CPNotFound && [rows firstIndex] < 0) || [rows lastIndex] >= [self numberOfRows]))
         return;
 
+    [self willChangeValueForKey:@"selectedRowIndexes"];
+
     // We deselect all columns when selecting rows.
     if ([_selectedColumnIndexes count] > 0)
     {
@@ -920,6 +923,8 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     [self _updateHighlightWithOldRows:previousSelectedIndexes newRows:_selectedRowIndexes];
     [_tableDrawView display]; // FIXME: should be setNeedsDisplayInRect:enclosing rect of new (de)selected rows
                               // but currently -drawRect: is not implemented here
+
+    [self didChangeValueForKey:@"selectedRowIndexes"];
     [self _noteSelectionDidChange];
 }
 
@@ -3423,6 +3428,11 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
 @implementation CPTableView (Bindings)
 
++ (CPSet)keyPathsForValuesAffectingSelectionIndexes
+{
+    return [CPSet setWithObjects:@"selectedRowIndexes"];
+}
+
 - (void)_establishBindingsIfUnbound:(id)destination
 {
     if ([[self infoForBinding:@"content"] objectForKey:CPObservedObjectKey] !== destination)
@@ -3436,6 +3446,16 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 - (void)setContent:(CPArray)content
 {
     [self reloadData];
+}
+
+- (CPIndexSet)selectionIndexes
+{
+    return [self selectedRowIndexes];
+}
+
+- (void)setSelectionIndexes:(CPIndexSet)theIndexes
+{
+    [self selectRowIndexes:theIndexes byExtendingSelection:NO];
 }
 
 @end
