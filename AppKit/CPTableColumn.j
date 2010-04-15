@@ -54,6 +54,15 @@ CPTableColumnUserResizingMask   = 1 << 1;
     BOOL _disableResizingPosting @accessors(property=disableResizingPosting);
 }
 
+
++ (void)initialize
+{
+    if (self !== [CPTableColumn class])
+        return;
+
+    [self exposeBinding:@"value"];
+}
+
 - (id)init
 {
     return [self initWithIdentifier:@""];
@@ -232,12 +241,12 @@ CPTableColumnUserResizingMask   = 1 << 1;
 
 /*!
     This method set's the "prototype" view which will be used to create all table cells in this column.
-    
-    It creates a snapshot of aView, using keyed archiving, which is then copied over and over for each 
+
+    It creates a snapshot of aView, using keyed archiving, which is then copied over and over for each
     individual cell that is shown. As a result, changes made after calling this method won't be reflected.
 
     Example:
-    
+
         [tableColumn setDataView:someView]; // snapshot taken
         [[tableColumn dataView] setSomething:x]; //won't work
 
