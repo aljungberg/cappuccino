@@ -227,6 +227,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
         return;
 
     [self exposeBinding:@"content"];
+    [self exposeBinding:@"selectionIndexes"];
 }
 
 - (id)initWithFrame:(CGRect)aFrame
@@ -796,18 +797,11 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 */
 - (void)selectRowIndexes:(CPIndexSet)rows byExtendingSelection:(BOOL)shouldExtendSelection
 {
-    /*
-    This indirection allows the Bindings category to override this method without code
-    duplication.
-    */
-    [self _selectRowIndexes: rows byExtendingSelection: shouldExtendSelection];
-}
-
-- (void)_selectRowIndexes:(CPIndexSet)rows byExtendingSelection:(BOOL)shouldExtendSelection
-{
     if ([rows isEqualToIndexSet:_selectedRowIndexes] ||
         (([rows firstIndex] != CPNotFound && [rows firstIndex] < 0) || [rows lastIndex] >= [self numberOfRows]))
         return;
+
+    [self willChangeValueForKey:@"selectedRowIndexes"];
 
     // We deselect all columns when selecting rows.
     if ([_selectedColumnIndexes count] > 0)
@@ -828,6 +822,8 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     [self _updateHighlightWithOldRows:previousSelectedIndexes newRows:_selectedRowIndexes];
     [_tableDrawView display]; // FIXME: should be setNeedsDisplayInRect:enclosing rect of new (de)selected rows
                               // but currently -drawRect: is not implemented here
+
+    [self didChangeValueForKey:@"selectedRowIndexes"];
     [self _noteSelectionDidChange];
 }
 
@@ -3243,6 +3239,11 @@ var CPTableViewDataSourceKey                = @"CPTableViewDataSourceKey",
 
 @implementation CPTableView (Bindings)
 
++ (CPSet)keyPathsForValuesAffectingSelectionIndexes
+{
+    return [CPSet setWithObjects:@"selectedRowIndexes"];
+}
+
 - (void)_establishBindingsIfUnbound:(id)destination
 {
     if ([[self infoForBinding:@"content"] objectForKey:CPObservedObjectKey] !== destination)
@@ -3258,35 +3259,14 @@ var CPTableViewDataSourceKey                = @"CPTableViewDataSourceKey",
     [self reloadData];
 }
 
-- (void)setValue:(id)aValue forKey:(CPString)aKey
+- (CPIndexSet)selectionIndexes
 {
-    if (aKey == 'selectionIndexes')
-    {
-        [self selectRowIndexes: aValue byExtendingSelection: NO];
-    }
-    else
-    {
-        [super setValue:aValue forKey:aKey];
-    }
+    return [self selectedRowIndexes];
 }
 
-- (id)valueForKey:(CPString)aKey
+- (void)setSelectionIndexes:(CPIndexSet)theIndexes
 {
-    if (aKey == 'selectionIndexes')
-    {
-        return [self selectedRowIndexes];
-    }
-    else
-    {
-        return [super valueForKey:aKey];
-    }
-}
-
-- (void)selectRowIndexes:(CPIndexSet)rows byExtendingSelection:(BOOL)shouldExtendSelection
-{
-    [self willChangeValueForKey:@"selectionIndexes"];
-    [self _selectRowIndexes: rows byExtendingSelection: shouldExtendSelection];
-    [self didChangeValueForKey:@"selectionIndexes"];
+    [self selectRowIndexes:theIndexes byExtendingSelection:NO];
 }
 
 @end
