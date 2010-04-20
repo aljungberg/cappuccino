@@ -824,6 +824,8 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
                               // but currently -drawRect: is not implemented here
 
     [self didChangeValueForKey:@"selectedRowIndexes"];
+    
+    [[CPKeyValueBinding getBinding:@"selectionIndexes" forObject:self] reverseSetValueFor:@"selectionIndexes"];
     [self _noteSelectionDidChange];
 }
 
