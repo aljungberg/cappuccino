@@ -540,8 +540,8 @@ CPOutlineViewDropOnItemIndex = -1;
     if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:typeSelectStringForTableColumn:item:)])
         _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_typeSelectStringForTableColumn_item_;
 
-    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:willDisplayCell:forTableColumn:item:)])
-        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_willDisplayCell_forTableColumn_item_;
+    if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:willDisplayView:forTableColumn:item:)])
+        _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_willDisplayView_forTableColumn_item_;
 
     if ([_outlineViewDelegate respondsToSelector:@selector(outlineView:willDisplayOutlineCell:forTableColumn:item:)])
         _implementedOutlineViewDelegateMethods |= CPOutlineViewDelegate_outlineView_willDisplayOutlineCell_forTableColumn_item_;
