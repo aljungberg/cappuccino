@@ -43,25 +43,25 @@ CPUnknownUserInfoKey        = @"CPUnknownUserInfoKey";
 + (SEL)_accessorForKey:(CPString)aKey
 {
     if (!CPObjectAccessorsForClass)
-        CPObjectAccessorsForClass = [CPDictionary dictionary];
+        CPObjectAccessorsForClass = {}
 
     var UID = [isa UID],
         selector = nil,
-        accessors = [CPObjectAccessorsForClass objectForKey:UID];
+        accessors = CPObjectAccessorsForClass[UID];
 
     if (accessors)
     {
-        selector = [accessors objectForKey:aKey];
+        selector = accessors[aKey];
 
         if (selector)
             return selector === [CPNull null] ? nil : selector;
     }
     else
     {
-        accessors = [CPDictionary dictionary];
-
-        [CPObjectAccessorsForClass setObject:accessors forKey:UID];
+        accessors = {}
+        CPObjectAccessorsForClass[UID] = accessors;
     }
+
 
     var capitalizedKey = aKey.charAt(0).toUpperCase() + aKey.substr(1);
 
@@ -72,12 +72,12 @@ CPUnknownUserInfoKey        = @"CPUnknownUserInfoKey";
         [self instancesRespondToSelector:selector = CPSelectorFromString("_" + aKey)] ||
         [self instancesRespondToSelector:selector = CPSelectorFromString("_is" + capitalizedKey)])
     {
-        [accessors setObject:selector forKey:aKey];
+        accessors[aKey] = selector;
 
         return selector;
     }
 
-    [accessors setObject:[CPNull null] forKey:aKey];
+    accessors[aKey] = [CPNull null];
 
     return nil;
 }

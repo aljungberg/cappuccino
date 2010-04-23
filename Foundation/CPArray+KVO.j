@@ -315,19 +315,32 @@
     }
     else
     {
-        var newArray = [],
-            enumerator = [self objectEnumerator],
-            object;
+        var newArray = [];
             
-        while ((object = [enumerator nextObject]) !== nil)
+        for (var objectIndex = 0; objectIndex < self.length; objectIndex++)
         {
-            var value = [object valueForKey:aKey];
-            
+            var object = self[objectIndex],
+                value = [object valueForKey:aKey];
+                
             if (value === nil || value === undefined)
                 value = [CPNull null];
                 
             newArray.push(value);
         }
+        
+        // var newArray = [],
+        //     enumerator = [self objectEnumerator],
+        //     object;
+        //     
+        // while ((object = [enumerator nextObject]) !== nil)
+        // {
+        //     var value = [object valueForKey:aKey];
+        //     
+        //     if (value === nil || value === undefined)
+        //         value = [CPNull null];
+        //         
+        //     newArray.push(value);
+        // }
         
         return newArray;
     }
