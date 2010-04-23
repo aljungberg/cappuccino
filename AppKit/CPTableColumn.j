@@ -465,7 +465,7 @@ CPTableColumnUserResizingMask   = 1 << 1;
 
 - (void)setValue:(CPArray)content
 {
-    [[self tableView] reloadData];
+    // [[self tableView] reloadData];
 }
 
 @end
