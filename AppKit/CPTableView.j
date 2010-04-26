@@ -1908,6 +1908,12 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     [newSortDescriptors removeObjectsInArray:outdatedDescriptors];
     [newSortDescriptors insertObject:newMainSortDescriptor atIndex:0];
 
+    var image = [newMainSortDescriptor ascending] ? [CPTableView _defaultTableHeaderSortImage] : [CPTableView _defaultTableHeaderReverseSortImage];
+
+    [self setIndicatorImage:nil inTableColumn:_currentHighlightedTableColumn];
+    [self setIndicatorImage:image inTableColumn:tableColumn];
+    [self setHighlightedTableColumn:tableColumn];
+
     [self setSortDescriptors:newSortDescriptors];
 }
 
