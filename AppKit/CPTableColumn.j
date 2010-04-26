@@ -401,6 +401,7 @@ CPTableColumnUserResizingMask   = 1 << 1;
     {
         // Automatically setup the sort descriptor for the bound key (default Cocoa behavior)
         var key = aKeyPath.substr(aKeyPath.lastIndexOf(@".") + 1);
+        CPLog.debug(@"key for keypath: %@ : %@", aKeyPath, key);
         [self setSortDescriptorPrototype:[CPSortDescriptor sortDescriptorWithKey:key ascending:YES]];
     }
 
