@@ -269,6 +269,8 @@ var kvoNewAndOld = CPKeyValueObservingOptionNew|CPKeyValueObservingOptionOld,
     if ([_replacedKeys containsObject:aKey] || ![_nativeClass automaticallyNotifiesObserversForKey:aKey])
         return;
 
+    [_replacedKeys addObject:aKey];
+
     var currentClass = _nativeClass,
         capitalizedKey = aKey.charAt(0).toUpperCase() + aKey.substring(1),
         found = false,
