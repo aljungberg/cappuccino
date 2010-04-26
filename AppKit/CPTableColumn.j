@@ -397,6 +397,13 @@ CPTableColumnUserResizingMask   = 1 << 1;
 {
     [super bind:aBinding toObject:anObject withKeyPath:aKeyPath options:options];
 
+    if (aBinding === @"value")
+    {
+        // Automatically setup the sort descriptor for the bound key (default Cocoa behavior)
+        var key = aKeyPath.substr(aKeyPath.lastIndexOf(@".") + 1);
+        [self setSortDescriptorPrototype:[CPSortDescriptor sortDescriptorWithKey:key ascending:YES]];
+    }
+
     if (![aBinding isEqual:@"someListOfExceptedBindings(notAcceptedBindings)"])
         [[self tableView] _establishBindingsIfUnbound:anObject];
 }
