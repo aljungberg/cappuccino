@@ -235,6 +235,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
     [self exposeBinding:@"content"];
     [self exposeBinding:@"selectionIndexes"];
+    [self exposeBinding:@"sortDescriptors"];
 }
 
 - (id)initWithFrame:(CGRect)aFrame
@@ -925,7 +926,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
                               // but currently -drawRect: is not implemented here
 
     [self didChangeValueForKey:@"selectedRowIndexes"];
-    
+
     [[CPKeyValueBinding getBinding:@"selectionIndexes" forObject:self] reverseSetValueFor:@"selectionIndexes"];
     [self _noteSelectionDidChange];
 }
@@ -1907,13 +1908,6 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     [newSortDescriptors removeObjectsInArray:outdatedDescriptors];
     [newSortDescriptors insertObject:newMainSortDescriptor atIndex:0];
 
-    // Update indicator image & highlighted column before
-   	var image = [newMainSortDescriptor ascending] ? [CPTableView _defaultTableHeaderSortImage] : [CPTableView _defaultTableHeaderReverseSortImage];
-
-    [self setIndicatorImage:nil inTableColumn:_currentHighlightedTableColumn];
-	[self setIndicatorImage:image inTableColumn:tableColumn];
-	[self setHighlightedTableColumn:tableColumn];
-
     [self setSortDescriptors:newSortDescriptors];
 }
 
@@ -2134,8 +2128,43 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
         return;
 
     _sortDescriptors = newSortDescriptors;
+    [[CPKeyValueBinding getBinding:@"sortDescriptors" forObject:self] reverseSetValueFor:@"sortDescriptors"];
 
-  	[self _sendDataSourceSortDescriptorsDidChange:oldSortDescriptors];
+    if ([_sortDescriptors count] > 0)
+    {
+        var mainSortDescriptor = [sortDescriptors objectAtIndex:0],
+            sortedKeyPath = [mainSortDescriptor key];
+
+        var tableColumns = [self tableColumns],
+            columnIndex = [tableColumns count];
+
+        // Find the column that was sorted by looking at the key path it's bound to
+        while(columnIndex--)
+        {
+            var tableColumn = [tableColumns objectAtIndex:columnIndex];
+                valueBinding = [CPKeyValueBinding infoForBinding:@"value" forObject:tableColumn];
+
+            if (!valueBinding)
+                break;
+
+            var observedKeyPath = [valueBinding objectForKey:CPObservedKeyPathKey],
+                lastDotIndex = observedKeyPath.lastIndexOf(@".") + 1,
+                observedKey = observedKeyPath.substr(lastDotIndex);
+
+            if (sortedKeyPath === observedKey)
+            {
+                // Update indicator image & highlighted column before
+                var image = [mainSortDescriptor ascending] ? [CPTableView _defaultTableHeaderSortImage] : [CPTableView _defaultTableHeaderReverseSortImage];
+
+                [self setIndicatorImage:nil inTableColumn:_currentHighlightedTableColumn];
+                [self setIndicatorImage:image inTableColumn:tableColumn];
+                [self setHighlightedTableColumn:tableColumn];
+                break;
+            }
+        }
+    }
+
+    [self _sendDataSourceSortDescriptorsDidChange:oldSortDescriptors];
 }
 
 - (CPArray)sortDescriptors
@@ -3064,11 +3093,11 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     // If there is no (the default) or to little inter cell spacing we create some room for the CPTableViewDropAbove indicator
     // This probably doesn't work if the row height is smaller than or around 5.0
     if ([self intercellSpacing].height < 5.0)
-		rowRect = CPRectInset(rowRect, 0.0, 5.0 - [self intercellSpacing].height);
+        rowRect = CPRectInset(rowRect, 0.0, 5.0 - [self intercellSpacing].height);
 
-	// If the altered row rect contains the drag point we show the drop on
-	// We don't show the drop on indicator if we are dragging below the last row
-	// in that case we always want to show the drop above indicator
+    // If the altered row rect contains the drag point we show the drop on
+    // We don't show the drop on indicator if we are dragging below the last row
+    // in that case we always want to show the drop above indicator
     if (CGRectContainsPoint(rowRect, theDragPoint) && row < _numberOfRows)
         return CPTableViewDropOn;
 
@@ -3080,22 +3109,22 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 */
 - (CPInteger)_proposedRowAtPoint:(CGPoint)dragPoint
 {
-	// We don't use rowAtPoint here because the drag indicator can appear below the last row
-	// and rowAtPoint doesn't return rows that are larger than numberOfRows
-	var row = FLOOR(dragPoint.y / ( _rowHeight + _intercellSpacing.height ));
+    // We don't use rowAtPoint here because the drag indicator can appear below the last row
+    // and rowAtPoint doesn't return rows that are larger than numberOfRows
+    var row = FLOOR(dragPoint.y / ( _rowHeight + _intercellSpacing.height ));
 
-	// Determine if the mouse is currently closer to this row or the row below it
-	var lowerRow = row + 1,
-		rect = [self rectOfRow:row],
-		lowerRect = [self rectOfRow:lowerRow];
+    // Determine if the mouse is currently closer to this row or the row below it
+    var lowerRow = row + 1,
+        rect = [self rectOfRow:row],
+        lowerRect = [self rectOfRow:lowerRow];
 
-	if (ABS(CPRectGetMinY(lowerRect) - dragPoint.y) < ABS(dragPoint.y - CPRectGetMinY(rect)))
-		row = lowerRow;
+    if (ABS(CPRectGetMinY(lowerRect) - dragPoint.y) < ABS(dragPoint.y - CPRectGetMinY(rect)))
+        row = lowerRow;
 
     if (row >= [self numberOfRows])
         row = [self numberOfRows];
 
-	return row;
+    return row;
 }
 
 - (void)_validateDrop:(id)info proposedRow:(CPInteger)row proposedDropOperation:(CPTableViewDropOperation)dropOperation
@@ -3119,7 +3148,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     if (theLowerRowIndex > [self numberOfRows])
         theLowerRowIndex = [self numberOfRows];
 
-	return [self rectOfRow:theLowerRowIndex];
+    return [self rectOfRow:theLowerRowIndex];
 }
 
 - (CPDragOperation)draggingUpdated:(id)sender
