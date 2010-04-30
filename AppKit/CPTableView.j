@@ -234,7 +234,6 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
         _allowsEmptySelection = YES;
         _allowsColumnSelection = NO;
         _disableAutomaticResizing = NO;
-        _tableViewFlags = 0;
 
         //Setting Display Attributes
         _selectionHighlightStyle = CPTableViewSelectionHighlightStyleRegular;
@@ -247,28 +246,13 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
         _dirtyTableColumnRangeIndex = CPNotFound;
         _numberOfHiddenColumns = 0;
 
-        _objectValues = { };
-        _dataViewsForTableColumns = { };
-        _dataViews=  [];
-        _numberOfRows = 0;
-        _exposedRows = [CPIndexSet indexSet];
-        _exposedColumns = [CPIndexSet indexSet];
-        _cachedDataViews = { };
         _intercellSpacing = _CGSizeMake(0.0, 0.0);
         _rowHeight = 23.0;
 
         [self setGridColor:[CPColor colorWithHexString:@"dce0e2"]];
         [self setGridStyleMask:CPTableViewGridNone];
 
-        _headerView = [[CPTableHeaderView alloc] initWithFrame:CGRectMake(0, 0, [self bounds].size.width, _rowHeight)];
-
-        [_headerView setTableView:self];
-
-        _cornerView = [[_CPCornerView alloc] initWithFrame:CGRectMake(0, 0, [CPScroller scrollerWidth], CGRectGetHeight([_headerView frame]))];
-
         _lastSelectedRow = -1;
-        _selectedColumnIndexes = [CPIndexSet indexSet];
-        _selectedRowIndexes = [CPIndexSet indexSet];
         _currentHighlightedTableColumn = nil;
 
         _sortDescriptors = [CPArray array];
@@ -281,10 +265,6 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
         _dragOperationDefaultMask = nil;
         _destinationDragStyle = CPTableViewDraggingDestinationFeedbackStyleRegular;
 
-        _tableDrawView = [[_CPTableDrawView alloc] initWithTableView:self];
-        [_tableDrawView setBackgroundColor:[CPColor clearColor]];
-        [self addSubview:_tableDrawView];
-
         [self setBackgroundColor:[CPColor whiteColor]];
         [self _init];
     }
@@ -295,10 +275,42 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 // FIX ME: we have a lot of redundent init stuff in initWithFrame: and initWithCoder: we should move it all into here.
 - (void)_init
 {
+        _tableViewFlags = 0;
+
+        _selectedColumnIndexes = [CPIndexSet indexSet];
+        _selectedRowIndexes = [CPIndexSet indexSet];
+
         _dropOperationFeedbackView = [[_CPDropOperationDrawingView alloc] initWithFrame:_CGRectMakeZero()];
         [_dropOperationFeedbackView setTableView:self];
 
         _lastColumnShouldSnap = NO;
+
+        if (!_alternatingRowBackgroundColors)
+            _alternatingRowBackgroundColors = [[CPColor whiteColor], [CPColor colorWithHexString:@"e4e7ff"]];
+
+        _tableColumnRanges = [];
+        _dirtyTableColumnRangeIndex = 0;
+        _numberOfHiddenColumns = 0;
+
+        _objectValues = { };
+        _dataViewsForTableColumns = { };
+        _dataViews=  [];
+        _numberOfRows = 0;
+        _exposedRows = [CPIndexSet indexSet];
+        _exposedColumns = [CPIndexSet indexSet];
+        _cachedDataViews = { };
+
+        _tableDrawView = [[_CPTableDrawView alloc] initWithTableView:self];
+        [_tableDrawView setBackgroundColor:[CPColor clearColor]];
+        [self addSubview:_tableDrawView];
+
+        if (!_headerView)
+            _headerView = [[CPTableHeaderView alloc] initWithFrame:CGRectMake(0, 0, [self bounds].size.width, _rowHeight)];
+
+        [_headerView setTableView:self];
+
+        if (!_cornerView)
+            _cornerView = [[_CPCornerView alloc] initWithFrame:CGRectMake(0, 0, [CPScroller scrollerWidth], CGRectGetHeight([_headerView frame]))];
 
         // Gradients for the source list
         _sourceListActiveGradient = CGGradientCreateWithColorComponents(CGColorSpaceCreateDeviceRGB(), [89.0/255.0, 153.0/255.0, 209.0/255.0,1.0, 33.0/255.0, 94.0/255.0, 208.0/255.0,1.0], [0,1], 2);
@@ -2484,10 +2496,9 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
             for(var c = firstExposedColumn; c < exposedColumnCount; c++)
             {
-                //console.log(columnIndexes);
                 var colRect = [self rectOfColumn:exposedColumnIndexes[c]],
                     colX = CGRectGetMaxX(colRect) + 0.5;
-                //console.log(colX);
+
                 CGContextMoveToPoint(context, colX, minY);
                 CGContextAddLineToPoint(context, colX, maxY);
             }
@@ -2611,7 +2622,10 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 {
     // Prevent CPControl from eating the mouse events when we are in a drag session
     if (![_draggedRowIndexes count])
+    {
+        [self autoscroll:anEvent];
         [super trackMouse:anEvent];
+    }
     else
         [CPApp sendEvent:anEvent];
 }
@@ -2929,14 +2943,6 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     [_dropOperationFeedbackView setCurrentRow:row];
     [self addSubview:_dropOperationFeedbackView];
 
-    // FIXME : Maybe we should do this in a timer outside this method.
-    // Problem: we don't know when the scroll ends or when the next -draggingUpdated is called.
-
-    if (row > 0 && location.y - CGRectGetMinY(exposedClipRect) < _rowHeight)
-        [self scrollRowToVisible:row - 1];
-    else if (row < numberOfRows && CGRectGetMaxY(exposedClipRect) - location.y < _rowHeight)
-        [self scrollRowToVisible:row + 1];
-
     return dragOperation;
 }
 
@@ -3104,7 +3110,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
 - (void)keyDown:(CPEvent)anEvent
 {
-    [self interpretKeyEvents:[CPArray arrayWithObject:anEvent]];
+    [self interpretKeyEvents:[anEvent]];
 }
 
 - (void)moveDown:(id)sender
@@ -3292,34 +3298,18 @@ var CPTableViewDataSourceKey                = @"CPTableViewDataSourceKey",
         _allowsEmptySelection = [aCoder decodeBoolForKey:CPTableViewEmptySelectionKey];
         _allowsColumnSelection = [aCoder decodeBoolForKey:CPTableViewColumnSelectionKey];
 
-        _tableViewFlags = 0;
-
         //Setting Display Attributes
         _selectionHighlightStyle = CPTableViewSelectionHighlightStyleRegular;
 
-        _usesAlternatingRowBackgroundColors = [aCoder decodeBoolForKey:CPTableViewUsesAlternatingBackgroundKey];
-        [self setAlternatingRowBackgroundColors:[[CPColor whiteColor], [CPColor colorWithHexString:@"e4e7ff"]]];
-
-        _tableColumns = [aCoder decodeObjectForKey:CPTableViewTableColumnsKey];
+        _tableColumns = [aCoder decodeObjectForKey:CPTableViewTableColumnsKey] || [];
         [_tableColumns makeObjectsPerformSelector:@selector(setTableView:) withObject:self];
 
-        _tableColumnRanges = [];
-        _dirtyTableColumnRangeIndex = 0;
-        _numberOfHiddenColumns = 0;
-
-        _objectValues = { };
-        _dataViewsForTableColumns = { };
-        _dataViews=  [];
-        _numberOfRows = 0;
-        _exposedRows = [CPIndexSet indexSet];
-        _exposedColumns = [CPIndexSet indexSet];
-        _cachedDataViews = { };
-        _rowHeight = [aCoder decodeFloatForKey:CPTableViewRowHeightKey];
-
-        if ([aCoder containsValueForKey:CPTableViewIntercellSpacingKey])
-            _intercellSpacing = [aCoder decodeSizeForKey:CPTableViewIntercellSpacingKey];
+        if ([aCoder containsValueForKey:CPTableViewRowHeightKey])
+            _rowHeight = [aCoder decodeFloatForKey:CPTableViewRowHeightKey];
         else
-            _intercellSpacing = _CGSizeMake(0.0, 0.0);
+            _rowHeight = 23.0;
+
+        _intercellSpacing = [aCoder decodeSizeForKey:CPTableViewIntercellSpacingKey] || _CGSizeMake(0.0, 0.0);
 
         _gridColor = [aCoder decodeObjectForKey:CPTableViewGridColorKey] || [CPColor grayColor];
         _gridStyleMask = [aCoder decodeIntForKey:CPTableViewGridStyleMaskKey] || CPTableViewGridNone;
@@ -3330,15 +3320,9 @@ var CPTableViewDataSourceKey                = @"CPTableViewDataSourceKey",
         _headerView = [aCoder decodeObjectForKey:CPTableViewHeaderViewKey];
         _cornerView = [aCoder decodeObjectForKey:CPTableViewCornerViewKey];
 
-        _selectedColumnIndexes = [CPIndexSet indexSet];
-        _selectedRowIndexes = [CPIndexSet indexSet];
-
         _dataSource = [aCoder decodeObjectForKey:CPTableViewDataSourceKey];
         _delegate = [aCoder decodeObjectForKey:CPTableViewDelegateKey];
 
-        _tableDrawView = [[_CPTableDrawView alloc] initWithTableView:self];
-        [_tableDrawView setBackgroundColor:[CPColor clearColor]];
-        [self addSubview:_tableDrawView];
         [self _init];
 
         [self viewWillMoveToSuperview:[self superview]];

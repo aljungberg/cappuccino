@@ -445,9 +445,7 @@
 
 - (CPView)_headerView
 {
-    var headerClipViewSubviews = [_headerClipView subviews];
-
-    return [headerClipViewSubviews count] ? headerClipViewSubviews[0] : nil;
+    return [_headerClipView documentView];
 }
 
 - (CGRect)_cornerViewFrame
@@ -670,15 +668,32 @@
 */
 - (void)scrollWheel:(CPEvent)anEvent
 {
-   var documentFrame = [[self documentView] frame],
-       contentBounds = [_contentView bounds];
+    [self _respondToScrollWheelEventWithDeltaX:[anEvent deltaX] * _horizontalLineScroll 
+                                        deltaY:[anEvent deltaY] * _verticalLineScroll];
+}
+
+- (void)_respondToScrollWheelEventWithDeltaX:(float)deltaX deltaY:(float)deltaY
+{
+    var documentFrame = [[self documentView] frame],
+        contentBounds = [_contentView bounds],
+        contentFrame = [_contentView frame],
+        enclosingScrollView = [self enclosingScrollView],
+        extraX = 0,
+        extraY = 0;
 
     // We want integral bounds!
-    contentBounds.origin.x = ROUND(contentBounds.origin.x + [anEvent deltaX] * _horizontalLineScroll);
-    contentBounds.origin.y = ROUND(contentBounds.origin.y + [anEvent deltaY] * _verticalLineScroll);
+    contentBounds.origin.x = ROUND(contentBounds.origin.x + deltaX);
+    contentBounds.origin.y = ROUND(contentBounds.origin.y + deltaY);
 
-    [_contentView scrollToPoint:contentBounds.origin];
-    [_headerClipView scrollToPoint:CGPointMake(contentBounds.origin.x, 0.0)];
+    var constrainedOrigin = [_contentView constrainScrollPoint:CGPointCreateCopy(contentBounds.origin)];
+    extraX = ((contentBounds.origin.x - constrainedOrigin.x) / _horizontalLineScroll) * [enclosingScrollView horizontalLineScroll];
+    extraY = ((contentBounds.origin.y - constrainedOrigin.y) / _verticalLineScroll) * [enclosingScrollView verticalLineScroll];
+
+    [_contentView scrollToPoint:constrainedOrigin];
+    [_headerClipView scrollToPoint:CGPointMake(constrainedOrigin.x, 0.0)];
+
+    if (extraX || extraY)
+        [enclosingScrollView _respondToScrollWheelEventWithDeltaX:extraX deltaY:extraY];
 }
 
 - (void)keyDown:(CPEvent)anEvent
@@ -759,7 +774,13 @@ var CPScrollViewContentViewKey       = "CPScrollViewContentView",
         
         _contentView            = [aCoder decodeObjectForKey:CPScrollViewContentViewKey];
         _headerClipView         = [aCoder decodeObjectForKey:CPScrollViewHeaderClipViewKey];
-        
+
+        if (!_headerClipView)
+        {
+            _headerClipView = [[CPClipView alloc] init];
+            [self addSubview:_headerClipView];
+        }
+
         _verticalScroller       = [aCoder decodeObjectForKey:CPScrollViewVScrollerKey];
         _horizontalScroller     = [aCoder decodeObjectForKey:CPScrollViewHScrollerKey];
 

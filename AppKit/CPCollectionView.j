@@ -426,8 +426,17 @@
         x += itemSize.width + _horizontalMargin;
     }
 
+    var superview = [self superview],
+        proposedHeight =  y + itemSize.height + _verticalMargin;
+
+    if ([superview isKindOfClass:[CPClipView class]])
+    {
+        var superviewSize = [superview bounds].size;
+        proposedHeight = MAX(superviewSize.height, proposedHeight);
+    }
+
     _tileWidth = width;
-    [self setFrameSize:CGSizeMake(width, y + itemSize.height + _verticalMargin)];
+    [self setFrameSize:CGSizeMake(width, proposedHeight)];
     _tileWidth = -1.0;
 }
 
@@ -590,6 +599,14 @@
 
 - (void)mouseDragged:(CPEvent)anEvent
 {
+    var locationInWindow = [anEvent locationInWindow],
+        mouseDownLocationInWindow = [_mouseDownEvent locationInWindow];
+
+    // FIXME: This is because Safari's drag hysteresis is 3px x 3px
+    if ((ABS(locationInWindow.x - mouseDownLocationInWindow.x) < 3) &&
+        (ABS(locationInWindow.y - mouseDownLocationInWindow.y) < 3))
+        return;
+
     if (![_delegate respondsToSelector:@selector(collectionView:dragTypesForItemsAtIndexes:)])
         return;
 

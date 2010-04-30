@@ -135,6 +135,8 @@ CPRunContinuesResponse  = -1002;
 {
     self = [super init];
 
+    CPApp = self;
+
     if (self)
     {
         _eventListeners = [];
@@ -142,66 +144,6 @@ CPRunContinuesResponse  = -1002;
         _windows = [];
 
         [_windows addObject:nil];
-
-        // FIXME: This should be read from the cib.
-        _mainMenu = [[CPMenu alloc] initWithTitle:@"MainMenu"];
-
-        // FIXME: We should implement autoenabling.
-        [_mainMenu setAutoenablesItems:NO];
-
-        var bundle = [CPBundle bundleForClass:[CPApplication class]],
-            newMenuItem = [[CPMenuItem alloc] initWithTitle:@"New" action:@selector(newDocument:) keyEquivalent:@"n"];
-
-        [newMenuItem setImage:[[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"CPApplication/New.png"] size:CGSizeMake(16.0, 16.0)]];
-        [newMenuItem setAlternateImage:[[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"CPApplication/NewHighlighted.png"] size:CGSizeMake(16.0, 16.0)]];
-
-        [_mainMenu addItem:newMenuItem];
-
-
-        var openMenuItem = [[CPMenuItem alloc] initWithTitle:@"Open" action:@selector(openDocument:) keyEquivalent:@"o"];
-
-        [openMenuItem setImage:[[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"CPApplication/Open.png"] size:CGSizeMake(16.0, 16.0)]];
-        [openMenuItem setAlternateImage:[[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"CPApplication/OpenHighlighted.png"] size:CGSizeMake(16.0, 16.0)]];
-
-        [_mainMenu addItem:openMenuItem];
-
-        var saveMenu = [[CPMenu alloc] initWithTitle:@"Save"],
-            saveMenuItem = [[CPMenuItem alloc] initWithTitle:@"Save" action:@selector(saveDocument:) keyEquivalent:nil];
-
-        [saveMenuItem setImage:[[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"CPApplication/Save.png"] size:CGSizeMake(16.0, 16.0)]];
-
-        [saveMenuItem setAlternateImage:[[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"CPApplication/SaveHighlighted.png"] size:CGSizeMake(16.0, 16.0)]];
-
-        [saveMenu addItem:[[CPMenuItem alloc] initWithTitle:@"Save" action:@selector(saveDocument:) keyEquivalent:@"s"]];
-        [saveMenu addItem:[[CPMenuItem alloc] initWithTitle:@"Save As" action:@selector(saveDocumentAs:) keyEquivalent:nil]];
-
-        [saveMenuItem setSubmenu:saveMenu];
-
-        [_mainMenu addItem:saveMenuItem];
-
-        var editMenuItem = [[CPMenuItem alloc] initWithTitle:@"Edit" action:nil keyEquivalent:nil],
-            editMenu = [[CPMenu alloc] initWithTitle:@"Edit"],
-
-            undoMenuItem = [[CPMenuItem alloc] initWithTitle:@"Undo" action:@selector(undo:) keyEquivalent:CPUndoKeyEquivalent],
-            redoMenuItem = [[CPMenuItem alloc] initWithTitle:@"Redo" action:@selector(redo:) keyEquivalent:CPRedoKeyEquivalent];
-
-        [undoMenuItem setKeyEquivalentModifierMask:CPUndoKeyEquivalentModifierMask];
-        [redoMenuItem setKeyEquivalentModifierMask:CPRedoKeyEquivalentModifierMask];
-
-        [editMenu addItem:undoMenuItem];
-        [editMenu addItem:redoMenuItem];
-
-
-        [editMenu addItem:[[CPMenuItem alloc] initWithTitle:@"Cut" action:@selector(cut:) keyEquivalent:@"x"]],
-        [editMenu addItem:[[CPMenuItem alloc] initWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@"c"]],
-        [editMenu addItem:[[CPMenuItem alloc] initWithTitle:@"Paste" action:@selector(paste:) keyEquivalent:@"v"]];
-
-        [editMenuItem setSubmenu:editMenu];
-        [editMenuItem setHidden:YES];
-
-        [_mainMenu addItem:editMenuItem];
-
-        [_mainMenu addItem:[CPMenuItem separatorItem]];
     }
 
     return self;
@@ -1194,8 +1136,71 @@ var _CPAppBootstrapperActions = nil;
 
         return YES;
     }
+    else
+        [self loadCiblessBrowserMainMenu];
 
     return NO;
+}
+
++ (void)loadCiblessBrowserMainMenu
+{
+    var mainMenu = [[CPMenu alloc] initWithTitle:@"MainMenu"];
+
+    // FIXME: We should implement autoenabling.
+    [mainMenu setAutoenablesItems:NO];
+
+    var bundle = [CPBundle bundleForClass:[CPApplication class]],
+        newMenuItem = [[CPMenuItem alloc] initWithTitle:@"New" action:@selector(newDocument:) keyEquivalent:@"n"];
+
+    [newMenuItem setImage:[[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"CPApplication/New.png"] size:CGSizeMake(16.0, 16.0)]];
+    [newMenuItem setAlternateImage:[[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"CPApplication/NewHighlighted.png"] size:CGSizeMake(16.0, 16.0)]];
+
+    [mainMenu addItem:newMenuItem];
+
+    var openMenuItem = [[CPMenuItem alloc] initWithTitle:@"Open" action:@selector(openDocument:) keyEquivalent:@"o"];
+
+    [openMenuItem setImage:[[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"CPApplication/Open.png"] size:CGSizeMake(16.0, 16.0)]];
+    [openMenuItem setAlternateImage:[[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"CPApplication/OpenHighlighted.png"] size:CGSizeMake(16.0, 16.0)]];
+
+    [mainMenu addItem:openMenuItem];
+
+    var saveMenu = [[CPMenu alloc] initWithTitle:@"Save"],
+        saveMenuItem = [[CPMenuItem alloc] initWithTitle:@"Save" action:@selector(saveDocument:) keyEquivalent:nil];
+
+    [saveMenuItem setImage:[[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"CPApplication/Save.png"] size:CGSizeMake(16.0, 16.0)]];
+    [saveMenuItem setAlternateImage:[[CPImage alloc] initWithContentsOfFile:[bundle pathForResource:@"CPApplication/SaveHighlighted.png"] size:CGSizeMake(16.0, 16.0)]];
+
+    [saveMenu addItem:[[CPMenuItem alloc] initWithTitle:@"Save" action:@selector(saveDocument:) keyEquivalent:@"s"]];
+    [saveMenu addItem:[[CPMenuItem alloc] initWithTitle:@"Save As" action:@selector(saveDocumentAs:) keyEquivalent:nil]];
+
+    [saveMenuItem setSubmenu:saveMenu];
+
+    [mainMenu addItem:saveMenuItem];
+
+    var editMenuItem = [[CPMenuItem alloc] initWithTitle:@"Edit" action:nil keyEquivalent:nil],
+        editMenu = [[CPMenu alloc] initWithTitle:@"Edit"],
+
+        undoMenuItem = [[CPMenuItem alloc] initWithTitle:@"Undo" action:@selector(undo:) keyEquivalent:CPUndoKeyEquivalent],
+        redoMenuItem = [[CPMenuItem alloc] initWithTitle:@"Redo" action:@selector(redo:) keyEquivalent:CPRedoKeyEquivalent];
+
+    [undoMenuItem setKeyEquivalentModifierMask:CPUndoKeyEquivalentModifierMask];
+    [redoMenuItem setKeyEquivalentModifierMask:CPRedoKeyEquivalentModifierMask];
+
+    [editMenu addItem:undoMenuItem];
+    [editMenu addItem:redoMenuItem];
+
+    [editMenu addItem:[[CPMenuItem alloc] initWithTitle:@"Cut" action:@selector(cut:) keyEquivalent:@"x"]],
+    [editMenu addItem:[[CPMenuItem alloc] initWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@"c"]],
+    [editMenu addItem:[[CPMenuItem alloc] initWithTitle:@"Paste" action:@selector(paste:) keyEquivalent:@"v"]];
+
+    [editMenuItem setSubmenu:editMenu];
+    [editMenuItem setHidden:YES];
+
+    [mainMenu addItem:editMenuItem];
+
+    [mainMenu addItem:[CPMenuItem separatorItem]];
+
+    [CPApp setMainMenu:mainMenu];
 }
 
 + (void)cibDidFinishLoading:(CPCib)aCib

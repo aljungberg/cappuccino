@@ -57,6 +57,25 @@ var CPNullSharedNull = nil;
     return CPNullSharedNull;
 }
 
+/*!
+    Returns CPNull null.
+    @param aCoder the coder from which to do nothing
+    @return [CPNull null]
+*/
+- (id)initWithCoder:(CPCoder)aCoder
+{
+    return [CPNull null];
+}
+
+/*!
+    Writes out nothing to the specified coder.
+    @param aCoder the coder to which nothing will
+    be written
+*/
+- (void)encodeWithCoder:(CPCoder)aCoder
+{
+}
+
 @end
 
 @implementation CPNull(CPCoding)

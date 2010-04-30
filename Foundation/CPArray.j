@@ -150,10 +150,10 @@
 {
     var i = 2,
         array = [[self alloc] init],
-        argument;
+        count = arguments.length;
 
-    for(; i < arguments.length && (argument = arguments[i]) != nil; ++i)
-        array.push(argument);
+    for (; i < count; ++i)
+        array.push(arguments[i]);
 
     return array;
 }
@@ -214,13 +214,13 @@
         var index = 0,
             count = [anArray count];
 
-        for(; index < count; ++index)
+        for (; index < count; ++index)
         {
             if (anArray[index].isa)
                 self[index] = [anArray[index] copy];
             // Do a deep/shallow copy?
             else
-                self[index] = anArray;
+                self[index] = anArray[index];
         }
     }
 
@@ -234,10 +234,10 @@
 {
     // The arguments array contains self and _cmd, so the first object is at position 2.
     var i = 2,
-        argument;
+        count = arguments.length;
 
-    for(; i < arguments.length && (argument = arguments[i]) != nil; ++i)
-        push(argument);
+    for (; i < count; ++i)
+        push(arguments[i]);
 
     return self;
 }
@@ -256,7 +256,7 @@
     {
         var index = 0;
 
-        for(; index < aCount; ++index)
+        for (; index < aCount; ++index)
             push(objects[index]);
     }
 
@@ -283,24 +283,21 @@
 
 /*!
     Returns the index of \c anObject in this array.
-    If the object is \c nil or not in the array,
+    If the object is not in the array,
     returns \c CPNotFound. It first attempts to find
-    a match using \c -isEqual:, then \c ==.
+    a match using \c -isEqual:, then \c ===.
     @param anObject the object to search for
 */
 - (int)indexOfObject:(id)anObject
 {
-    if (anObject === nil)
-        return CPNotFound;
-
     var i = 0,
         count = length;
 
     // Only use -isEqual: if our object is a CPObject.
-    if (anObject.isa)
+    if (anObject && anObject.isa)
     {
-        for(; i < count; ++i)
-            if([self[i] isEqual:anObject])
+        for (; i < count; ++i)
+            if ([self[i] isEqual:anObject])
                 return i;
     }
     // If indexOf exists, use it since it's probably
@@ -309,8 +306,8 @@
         return indexOf(anObject);
     // Last resort, do a straight forward linear O(N) search.
     else
-        for(; i < count; ++i)
-            if(self[i] == anObject)
+        for (; i < count; ++i)
+            if (self[i] === anObject)
                 return i;
 
     return CPNotFound;
@@ -319,45 +316,39 @@
 /*!
     Returns the index of \c anObject in the array
     within \c aRange. It first attempts to find
-    a match using \c -isEqual:, then \c ==.
+    a match using \c -isEqual:, then \c ===.
     @param anObject the object to search for
     @param aRange the range to search within
     @return the index of the object, or \c CPNotFound if it was not found.
 */
 - (int)indexOfObject:(id)anObject inRange:(CPRange)aRange
 {
-    if (anObject === nil || anObject === undefined)
-        return CPNotFound;
-
     var i = aRange.location,
         count = MIN(CPMaxRange(aRange), length);
 
     // Only use isEqual: if our object is a CPObject.
-    if (anObject.isa)
+    if (anObject && anObject.isa)
     {
-        for(; i < count; ++i)
-            if([self[i] isEqual:anObject])
+        for (; i < count; ++i)
+            if ([self[i] isEqual:anObject])
                 return i;
     }
     // Last resort, do a straight forward linear O(N) search.
     else
-        for(; i < count; ++i)
-            if(self[i] == anObject)
+        for (; i < count; ++i)
+            if (self[i] === anObject)
                 return i;
 
     return CPNotFound;
 }
 
 /*!
-    Returns the index of \c anObject in the array. The test for equality is done using only \c ==.
+    Returns the index of \c anObject in the array. The test for equality is done using only \c ===.
     @param anObject the object to search for
     @return the index of the object in the array. \c CPNotFound if the object is not in the array.
 */
 - (int)indexOfObjectIdenticalTo:(id)anObject
 {
-    if (anObject === nil)
-        return CPNotFound;
-
     // If indexOf exists, use it since it's probably
     // faster than anything we can implement.
     if (self.indexOf)
@@ -369,8 +360,8 @@
         var index = 0,
             count = length;
 
-        for(; index < count; ++index)
-            if(self[index] === anObject)
+        for (; index < count; ++index)
+            if (self[index] === anObject)
                 return index;
     }
 
@@ -387,9 +378,6 @@
 */
 - (int)indexOfObjectIdenticalTo:(id)anObject inRange:(CPRange)aRange
 {
-    if (anObject === nil)
-        return CPNotFound;
-
     // If indexOf exists, use it since it's probably
     // faster than anything we can implement.
     if (self.indexOf)
@@ -406,8 +394,8 @@
         var index = aRange.location,
             count = MIN(CPMaxRange(aRange), length);
 
-        for(; index < count; ++index)
-            if(self[index] == anObject)
+        for (; index < count; ++index)
+            if (self[index] == anObject)
                 return index;
     }
 
@@ -424,7 +412,7 @@
 */
 - (unsigned)indexOfObject:(id)anObject sortedBySelector:(SEL)aSelector
 {
-    return [self indexOfObject:anObject sortedByFunction: function(lhs, rhs) { objj_msgSend(lhs, aSelector, rhs); }];
+    return [self indexOfObject:anObject sortedByFunction:function(lhs, rhs) { objj_msgSend(lhs, aSelector, rhs); }];
 }
 
 /*!
@@ -465,13 +453,17 @@
 
 - (unsigned)_indexOfObject:(id)anObject sortedByFunction:(Function)aFunction context:(id)aContext
 {
-    if (!aFunction || anObject === undefined)
+    if (!aFunction)
         return CPNotFound;
 
     if (length === 0)
         return -1;
 
-    var mid, c, first = 0, last = length - 1;
+    var mid,
+        c,
+        first = 0,
+        last = length - 1;
+
     while (first <= last)
     {
         mid = FLOOR((first + last) / 2);
@@ -490,7 +482,7 @@
         }
     }
 
-    return -first-1;
+    return -first - 1;
 }
 
 /*!
@@ -510,7 +502,7 @@
             result = CPOrderedSame;
 
         while (i < count)
-            if((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
+            if ((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
                 return result;
 
         return result;
@@ -546,7 +538,8 @@
 {
     var count = [self count];
 
-    if (!count) return nil;
+    if (!count)
+        return nil;
 
     return self[count - 1];
 }
@@ -573,7 +566,7 @@
     var index = CPNotFound,
         objects = [];
 
-    while((index = [indexes indexGreaterThanIndex:index]) !== CPNotFound)
+    while ((index = [indexes indexGreaterThanIndex:index]) !== CPNotFound)
         [objects addObject:[self objectAtIndex:index]];
 
     return objects;
@@ -613,7 +606,7 @@
     var index = 0,
         count = length;
 
-    for(; index < count; ++index)
+    for (; index < count; ++index)
         objj_msgSend(self[index], aSelector);
 }
 
@@ -631,7 +624,7 @@
     var index = 0,
         count = length;
 
-    for(; index < count; ++index)
+    for (; index < count; ++index)
         objj_msgSend(self[index], aSelector, anObject);
 }
 
@@ -644,7 +637,7 @@
         count = length,
         argumentsArray = [nil, aSelector].concat(objects || []);
 
-    for(; index < count; ++index)
+    for (; index < count; ++index)
     {
         argumentsArray[0] = self[index];
         objj_msgSend.apply(this, argumentsArray);
@@ -666,8 +659,8 @@
     var i = 0,
         count = [self count];
 
-    for(; i < count; ++i)
-        if([anArray containsObject:self[i]])
+    for (; i < count; ++i)
+        if ([anArray containsObject:self[i]])
             return self[i];
 
     return nil;
@@ -687,7 +680,7 @@
     var index = 0,
         count = [self count];
 
-    for(; index < count; ++index)
+    for (; index < count; ++index)
     {
         var lhs = self[index],
             rhs = anArray[index];
@@ -705,7 +698,7 @@
     if (self === anObject)
         return YES;
 
-    if(![anObject isKindOfClass:[CPArray class]])
+    if (![anObject isKindOfClass:[CPArray class]])
         return NO;
 
     return [self isEqualToArray:anObject];
@@ -720,12 +713,7 @@
 */
 - (CPArray)arrayByAddingObject:(id)anObject
 {
-    if (anObject === nil || anObject === undefined)
-        [CPException raise:CPInvalidArgumentException
-                    reason:"arrayByAddingObject: object can't be nil"];
-
     var array = [self copy];
-
     array.push(anObject);
 
     return array;
@@ -747,8 +735,8 @@
         count = [self count],
         array = [CPArray array];
 
-    for(; i<count; ++i)
-        if(aPredicate.evaluateWithObject(self[i]))
+    for (; i<count; ++i)
+        if (aPredicate.evaluateWithObject(self[i]))
             array.push(self[i]);
 
     return array;
@@ -847,7 +835,7 @@
         count = [self count],
         description = '(';
 
-    for(; index < count; ++index)
+    for (; index < count; ++index)
     {
         if (index === 0)
             description += '\n';
@@ -880,7 +868,7 @@
         count = [self count],
         array = [];
 
-    for(; index < count; ++index)
+    for (; index < count; ++index)
         if (self[index].isa && [self[index] isKindOfClass:[CPString class]] && [filterTypes containsObject:[self[index] pathExtension]])
             array.push(self[index]);
 
@@ -898,7 +886,7 @@
     var i = 0,
         count = [self count];
 
-    for(; i < count; ++i)
+    for (; i < count; ++i)
         [self[i] setValue:aValue forKey:aKey];
 }
 
@@ -913,7 +901,7 @@
         count = [self count],
         array = [];
 
-    for(; i < count; ++i)
+    for (; i < count; ++i)
         array.push([self[i] valueForKey:aKey]);
 
     return array;
@@ -993,12 +981,12 @@
     var indexesCount = [indexes count],
         objectsCount = [objects count];
 
-    if(indexesCount !== objectsCount)
+    if (indexesCount !== objectsCount)
         [CPException raise:CPRangeException reason:"the counts of the passed-in array (" + objectsCount + ") and index set (" + indexesCount + ") must be identical."];
 
     var lastIndex = [indexes lastIndex];
 
-    if(lastIndex >= [self count] + indexesCount)
+    if (lastIndex >= [self count] + indexesCount)
         [CPException raise:CPRangeException reason:"the last index (" + lastIndex + ") must be less than the sum of the original count (" + [self count] + ") and the insertion count (" + indexesCount + ")."];
 
     var index = 0,
@@ -1017,14 +1005,14 @@
             result = CPOrderedSame;
 
         while (i < count)
-            if((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
+            if ((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
                 return result;
 
         return result;
     } context:nil];
 
     if (index < 0)
-        index = -index-1;
+        index = -index - 1;
 
     [self insertObject:anObject atIndex:index];
     return index;
@@ -1051,7 +1039,7 @@
     var i = 0,
         index = [anIndexSet firstIndex];
 
-    while(index != CPNotFound)
+    while (index != CPNotFound)
     {
         [self replaceObjectAtIndex:index withObject:objects[i++]];
         index = [anIndexSet indexGreaterThanIndex:index];
@@ -1092,7 +1080,8 @@
 */
 - (void)setArray:(CPArray)anArray
 {
-    if(self == anArray) return;
+    if (self == anArray)
+        return;
 
     splice.apply(self, [0, length].concat(anArray));
 }
@@ -1235,8 +1224,8 @@
             count = [descriptors count],
             result = CPOrderedSame;
 
-        while(i < count)
-            if((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
+        while (i < count)
+            if ((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
                 return result;
 
         return result;
