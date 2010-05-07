@@ -3256,24 +3256,6 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
 @end
 
-var CPTableViewDataSourceKey                = @"CPTableViewDataSourceKey",
-    CPTableViewDelegateKey                  = @"CPTableViewDelegateKey",
-    CPTableViewHeaderViewKey                = @"CPTableViewHeaderViewKey",
-    CPTableViewTableColumnsKey              = @"CPTableViewTableColumnsKey",
-    CPTableViewRowHeightKey                 = @"CPTableViewRowHeightKey",
-    CPTableViewIntercellSpacingKey          = @"CPTableViewIntercellSpacingKey",
-    CPTableViewMultipleSelectionKey         = @"CPTableViewMultipleSelectionKey",
-    CPTableViewEmptySelectionKey            = @"CPTableViewEmptySelectionKey",
-    CPTableViewColumnReorderingKey          = @"CPTableViewColumnReorderingKey",
-    CPTableViewColumnResizingKey            = @"CPTableViewColumnResizingKey",
-    CPTableViewColumnSelectionKey           = @"CPTableViewColumnSelectionKey",
-    CPTableViewGridColorKey                 = @"CPTableViewGridColorKey",
-    CPTableViewGridStyleMaskKey             = @"CPTableViewGridStyleMaskKey",
-    CPTableViewUsesAlternatingBackgroundKey = @"CPTableViewUsesAlternatingBackgroundKey",
-    CPTableViewAlternatingRowColorsKey      = @"CPTableViewAlternatingRowColorsKey",
-    CPTableViewHeaderViewKey                = @"CPTableViewHeaderViewKey",
-    CPTableViewCornerViewKey                = @"CPTableViewCornerViewKey";
-
 @implementation CPTableView (Bindings)
 
 + (CPSet)keyPathsForValuesAffectingSelectionIndexes
@@ -3307,6 +3289,24 @@ var CPTableViewDataSourceKey                = @"CPTableViewDataSourceKey",
 }
 
 @end
+
+var CPTableViewDataSourceKey                = @"CPTableViewDataSourceKey",
+    CPTableViewDelegateKey                  = @"CPTableViewDelegateKey",
+    CPTableViewHeaderViewKey                = @"CPTableViewHeaderViewKey",
+    CPTableViewTableColumnsKey              = @"CPTableViewTableColumnsKey",
+    CPTableViewRowHeightKey                 = @"CPTableViewRowHeightKey",
+    CPTableViewIntercellSpacingKey          = @"CPTableViewIntercellSpacingKey",
+    CPTableViewMultipleSelectionKey         = @"CPTableViewMultipleSelectionKey",
+    CPTableViewEmptySelectionKey            = @"CPTableViewEmptySelectionKey",
+    CPTableViewColumnReorderingKey          = @"CPTableViewColumnReorderingKey",
+    CPTableViewColumnResizingKey            = @"CPTableViewColumnResizingKey",
+    CPTableViewColumnSelectionKey           = @"CPTableViewColumnSelectionKey",
+    CPTableViewGridColorKey                 = @"CPTableViewGridColorKey",
+    CPTableViewGridStyleMaskKey             = @"CPTableViewGridStyleMaskKey",
+    CPTableViewUsesAlternatingBackgroundKey = @"CPTableViewUsesAlternatingBackgroundKey",
+    CPTableViewAlternatingRowColorsKey      = @"CPTableViewAlternatingRowColorsKey",
+    CPTableViewHeaderViewKey                = @"CPTableViewHeaderViewKey",
+    CPTableViewCornerViewKey                = @"CPTableViewCornerViewKey";
 
 @implementation CPTableView (CPCoding)
 
@@ -3344,6 +3344,9 @@ var CPTableViewDataSourceKey                = @"CPTableViewDataSourceKey",
 
         _headerView = [aCoder decodeObjectForKey:CPTableViewHeaderViewKey];
         _cornerView = [aCoder decodeObjectForKey:CPTableViewCornerViewKey];
+
+        _selectedColumnIndexes = [CPIndexSet indexSet];
+        _selectedRowIndexes = [CPIndexSet indexSet];
 
         _dataSource = [aCoder decodeObjectForKey:CPTableViewDataSourceKey];
         _delegate = [aCoder decodeObjectForKey:CPTableViewDelegateKey];

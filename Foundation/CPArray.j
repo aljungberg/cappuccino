@@ -482,7 +482,7 @@
         }
     }
 
-    return -first - 1;
+    return -first-1;
 }
 
 /*!

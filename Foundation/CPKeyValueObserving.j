@@ -611,8 +611,7 @@ var kvoNewAndOld = CPKeyValueObservingOptionNew|CPKeyValueObservingOptionOld,
 
 - (void)observeValueForKeyPath:(CPString)aKeyPath ofObject:(id)anObject change:(CPDictionary)changes context:(id)aContext
 {
-    //CPLog("OBSERVE FORWARDING: "+aKeyPath+" "+anObject+" "+([anObject valueForKeyPath:aKeyPath])+" "+aContext);
-    if (anObject == _object)
+    if (aKeyPath === _firstPart)
     {
         [_observer observeValueForKeyPath:_firstPart ofObject:_object change:changes context:_context];
 
