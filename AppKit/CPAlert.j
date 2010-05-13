@@ -283,6 +283,14 @@ var CPAlertWarningImage,
 */
 - (void)runModal
 {
+    [self _preparePanel];
+    
+    [CPApp runModalForWindow:_alertPanel];
+}
+
+/* @ignore */
+- (void)_preparePanel
+{
     var theTitle;
     
     switch (_alertStyle)
@@ -299,8 +307,25 @@ var CPAlertWarningImage,
     }
     
     [_alertPanel setTitle:_windowTitle ? _windowTitle : theTitle];
-    
-    [CPApp runModalForWindow:_alertPanel];
+}
+
+/*!
+    Runs the receiver modally as an alert sheet attached to a specified window.
+
+    @param window - The window this sheet should be attached to.
+    @param modalDelegate - The delegate for the modal-dialog session.
+    @param alertDidEndSelector - Message the alert sends to modalDelegate after the user responds but before the sheet is dismissed.
+    @param contextInfo - Contextual data passed to modalDelegate in didEndSelector message.
+*/
+- (void)beginSheetModalForWindow:(CPWindow)aWindow modalDelegate:(id)aModalDelegate didEndSelector:(SEL)aDidEndSelector contextInfo:(id)aContextInfo
+{
+    [self _preparePanel];
+    [self setWindowStyle:CPDocModalWindowMask];
+    [CPApp beginSheet:_alertPanel
+           modalForWindow:aWindow
+           modalDelegate:aModalDelegate
+           didEndSelector:aDidEndSelector
+           contextInfo:aContextInfo];
 }
 
 /* @ignore */
