@@ -264,6 +264,7 @@ var kvoNewAndOld = CPKeyValueObservingOptionNew|CPKeyValueObservingOptionOld,
             "set"+capitalizedKey+":", _kvoMethodForMethod,
             "_set"+capitalizedKey+":", _kvoMethodForMethod,
             "insertObject:in"+capitalizedKey+"AtIndex:", _kvoInsertMethodForMethod,
+            "insertObjects:in"+capitalizedKey+"AtIndexes:", _kvoInsertMethodForMethod,
             "replaceObjectIn"+capitalizedKey+"AtIndex:withObject:", _kvoReplaceMethodForMethod,
             "removeObjectFrom"+capitalizedKey+"AtIndex:", _kvoRemoveMethodForMethod
         ];
@@ -668,11 +669,11 @@ var _kvoMethodForMethod = function _kvoMethodForMethod(theKey, theMethod)
 
 var _kvoInsertMethodForMethod = function _kvoInsertMethodForMethod(theKey, theMethod)
 {
-    return function(self, _cmd, object, index)
+    return function(self, _cmd, object, indexes)
     {
-        [self willChange:CPKeyValueChangeInsertion valuesAtIndexes:[CPIndexSet indexSetWithIndex:index] forKey:theKey];
-        theMethod.method_imp(self, _cmd, object, index);
-        [self didChange:CPKeyValueChangeInsertion valuesAtIndexes:[CPIndexSet indexSetWithIndex:index] forKey:theKey]
+        [self willChange:CPKeyValueChangeInsertion valuesAtIndexes:indexes forKey:theKey];
+        theMethod.method_imp(self, _cmd, object, indexes);
+        [self didChange:CPKeyValueChangeInsertion valuesAtIndexes:indexes forKey:theKey]
     }
 }
 
