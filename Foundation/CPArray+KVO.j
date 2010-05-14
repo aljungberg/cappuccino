@@ -120,7 +120,7 @@
 
     _insertManySEL = sel_getName(@"insertObjects:in"+capitalizedKey+"AtIndexes:");
     if ([_proxyObject respondsToSelector:_insertManySEL])
-        _insert = [_proxyObject methodForSelector:_insertManySEL];
+        _insertMany = [_proxyObject methodForSelector:_insertManySEL];
 
     _removeManySEL = sel_getName(@"removeObjectsFrom"+capitalizedKey+"AtIndexes:");
     if ([_proxyObject respondsToSelector:_removeManySEL])
@@ -235,7 +235,9 @@
 - (void)addObject:(id)anObject
 {
     if (_insert)
-        return _insert(_proxyObject, _insertSEL, anObject, [self count]);
+        return _insert(_proxyObject, _insertSEL, anObject, [CPIndexSet indexSetWithIndex:[self count]]);
+    else if (_insertMany)
+        return _insertMany(_proxyObject, _insertManySEL, [anObject], [CPIndexSet indexSetWithIndex:[self count]]);
 
     var target = [[self _representedObject] copy];
 
@@ -245,6 +247,9 @@
 
 - (void)addObjectsFromArray:(CPArray)anArray
 {
+    if (_insertMany)
+        return _insertMany(_proxyObject, _insertManySEL, anArray, [CPIndexSet indexSetWithIndexesInRange:CPMakeRange([self count], [anArray count])]);
+    
     var index = 0,
         count = [anArray count];
 
@@ -256,6 +261,8 @@
 {
     if (_insert)
         return _insert(_proxyObject, _insertSEL, anObject, anIndex);
+    else if (_insertMany)
+        return _insertMany(_proxyObject, _insertManySEL, [anObject], [CPIndexSet indexSetWithIndex:anIndex]);
 
     var target = [[self _representedObject] copy];
 
