@@ -92,6 +92,8 @@ var CPAlertWarningImage,
     CPArray         _buttons;
 
     id              _delegate;
+    
+    BOOL            _isSheet;
 }
 
 + (void)initialize
@@ -121,6 +123,7 @@ var CPAlertWarningImage,
         _buttonCount = 0;
         _buttons = [CPArray array];
         _alertStyle = CPWarningAlertStyle;
+        _isSheet = NO;
 
         [self setWindowStyle:nil];
     }
@@ -319,6 +322,7 @@ var CPAlertWarningImage,
 */
 - (void)beginSheetModalForWindow:(CPWindow)aWindow modalDelegate:(id)aModalDelegate didEndSelector:(SEL)aDidEndSelector contextInfo:(id)aContextInfo
 {
+    _isSheet = YES;
     [self _preparePanel];
     [self setWindowStyle:CPDocModalWindowMask];
     [CPApp beginSheet:_alertPanel
@@ -331,11 +335,18 @@ var CPAlertWarningImage,
 /* @ignore */
 - (void)_notifyDelegate:(id)button
 {
-    [CPApp abortModal];
-    [_alertPanel close];
+    if (_isSheet)
+    {
+        [CPApp endSheet:_alertPanel returnCode:[button tag]];
+    }
+    else
+    {
+        [CPApp abortModal];
+        [_alertPanel close];
 
-    if (_delegate && [_delegate respondsToSelector:@selector(alertDidEnd:returnCode:)])
-        [_delegate alertDidEnd:self returnCode:[button tag]];
+        if (_delegate && [_delegate respondsToSelector:@selector(alertDidEnd:returnCode:)])
+            [_delegate alertDidEnd:self returnCode:[button tag]];
+    }
 }
 
 @end
