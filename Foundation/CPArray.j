@@ -20,11 +20,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+@import "CPEnumerator.j"
+@import "CPException.j"
 @import "CPObject.j"
 @import "CPRange.j"
-@import "CPEnumerator.j"
 @import "CPSortDescriptor.j"
-@import "CPException.j"
 
 
 /* @ignore */
@@ -475,7 +475,7 @@
             last = mid - 1;
         else
         {
-            while (mid < length - 1 && aFunction(anObject, self[mid+1], aContext) == CPOrderedSame)
+            while (mid < length - 1 && aFunction(anObject, self[mid + 1], aContext) == CPOrderedSame)
                 mid++;
 
             return mid;
@@ -922,7 +922,7 @@
 
 @end
 
-@implementation CPArray(CPMutableArray)
+@implementation CPArray (CPMutableArray)
 
 // Creating arrays
 /*!
@@ -1015,7 +1015,7 @@
     } context:nil];
 
     if (index < 0)
-        index = -index-1;
+        index = -index - 1;
 
     [self insertObject:anObject atIndex:index];
     return index;

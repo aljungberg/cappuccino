@@ -224,7 +224,7 @@ var kvoNewAndOld = CPKeyValueObservingOptionNew|CPKeyValueObservingOptionOld,
 - (void)_replaceClass
 {
     var currentClass = _nativeClass,
-        kvoClassName = "$KVO_"+class_getName(_nativeClass),
+        kvoClassName = "$KVO_" + class_getName(_nativeClass),
         existingKVOClass = objj_lookUpClass(kvoClassName);
 
     if (existingKVOClass)
@@ -239,12 +239,26 @@ var kvoNewAndOld = CPKeyValueObservingOptionNew|CPKeyValueObservingOptionOld,
 
     //copy in the methods from our model subclass
     var methodList = _CPKVOModelSubclass.method_list,
-        count = methodList.length;
+        count = methodList.length,
+        i = 0;
 
-    for (var i=0; i<count; i++)
+    for (; i < count; i++)
     {
         var method = methodList[i];
         class_addMethod(kvoClass, method_getName(method), method_getImplementation(method), "");
+    }
+
+    if ([_targetObject isKindOfClass:[CPDictionary class]])
+    {
+        var methodList = _CPKVOModelDictionarySubclass.method_list,
+            count = methodList.length,
+            i = 0;
+
+        for (; i < count; i++)
+        {
+            var method = methodList[i];
+            class_addMethod(kvoClass, method_getName(method), method_getImplementation(method), "");
+        }
     }
 
     _targetObject.isa = kvoClass;
@@ -272,7 +286,7 @@ var kvoNewAndOld = CPKeyValueObservingOptionNew|CPKeyValueObservingOptionOld,
     for (var i=0, count=replacementMethods.length; i<count; i+=2)
     {
         var theSelector = sel_getName(replacementMethods[i]),
-            theReplacementMethod = replacementMethods[i+1];
+            theReplacementMethod = replacementMethods[i + 1];
 
         if ([_nativeClass instancesRespondToSelector:theSelector])
         {
@@ -568,6 +582,57 @@ var kvoNewAndOld = CPKeyValueObservingOptionNew|CPKeyValueObservingOptionOld,
 
 @end
 
+@implementation _CPKVOModelDictionarySubclass
+{
+}
+
+- (void)removeAllObjects
+{
+    var keys = [self allKeys],
+        count = [keys count],
+        i = 0;
+
+    for (; i < count; i++)
+        [self willChangeValueForKey:keys[i]];
+
+    var superClass = [self class],
+        methodSelector = @selector(removeAllObjects),
+        methodImp = class_getMethodImplementation(superClass, methodSelector);
+
+    methodImp(self, methodSelector);
+
+    for (i = 0; i < count; i++)
+        [self didChangeValueForKey:keys[i]];
+}
+
+- (void)removeObjectForKey:(id)aKey
+{
+    [self willChangeValueForKey:aKey];
+
+    var superClass = [self class],
+        methodSelector = @selector(removeObjectForKey:),
+        methodImp = class_getMethodImplementation(superClass, methodSelector);
+
+    methodImp(self, methodSelector, aKey);
+
+    [self didChangeValueForKey:aKey];
+}
+
+- (void)setObject:(id)anObject forKey:(id)aKey
+{
+    [self willChangeValueForKey:aKey];
+
+    var superClass = [self class],
+        methodSelector = @selector(setObject:forKey:),
+        methodImp = class_getMethodImplementation(superClass, methodSelector);
+
+    methodImp(self, methodSelector, anObject, aKey);
+
+    [self didChangeValueForKey:aKey];
+}
+
+@end
+
 @implementation _CPKVOForwardingObserver : CPObject
 {
     id          _object;
@@ -596,7 +661,7 @@ var kvoNewAndOld = CPKeyValueObservingOptionNew|CPKeyValueObservingOptionOld,
         [CPException raise:CPInvalidArgumentException reason:"Created _CPKVOForwardingObserver without compound key path: "+aKeyPath];
 
     _firstPart = aKeyPath.substring(0, dotIndex);
-    _secondPart = aKeyPath.substring(dotIndex+1);
+    _secondPart = aKeyPath.substring(dotIndex + 1);
 
     //become an observer of the first part of our key (a)
     [_object addObserver:self forKeyPath:_firstPart options:kvoNewAndOld context:nil];

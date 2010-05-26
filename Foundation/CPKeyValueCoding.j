@@ -25,6 +25,7 @@
 @import "CPNull.j"
 @import "CPObject.j"
 
+
 var CPObjectAccessorsForClass   = nil,
     CPObjectModifiersForClass   = nil;
 
@@ -160,7 +161,7 @@ CPUnknownUserInfoKey        = @"CPUnknownUserInfoKey";
     if (selector)
         return objj_msgSend(self, selector);
 
-    if([theClass accessInstanceVariablesDirectly])
+    if ([theClass accessInstanceVariablesDirectly])
     {
         var ivar = [self _ivarForKey:aKey];
 
@@ -179,7 +180,7 @@ CPUnknownUserInfoKey        = @"CPUnknownUserInfoKey";
         return [self valueForKey:aKeyPath];
 
     var firstKeyComponent = aKeyPath.substring(0, firstDotIndex),
-        remainingKeyPath = aKeyPath.substring(firstDotIndex+1),
+        remainingKeyPath = aKeyPath.substring(firstDotIndex + 1),
         value = [self valueForKey:firstKeyComponent];
 
     return [value valueForKeyPath:remainingKeyPath];
@@ -221,7 +222,7 @@ CPUnknownUserInfoKey        = @"CPUnknownUserInfoKey";
         count = keys.length - 1,
         owner = self;
 
-    for(; i < count; ++i)
+    for (; i < count; ++i)
         owner = [owner valueForKey:keys[i]];
 
     [owner setValue:aValue forKey:keys[i]];
@@ -235,7 +236,7 @@ CPUnknownUserInfoKey        = @"CPUnknownUserInfoKey";
     if (selector)
         return objj_msgSend(self, selector, aValue);
 
-    if([theClass accessInstanceVariablesDirectly])
+    if ([theClass accessInstanceVariablesDirectly])
     {
         var ivar = [self _ivarForKey:aKey];
 
@@ -267,7 +268,10 @@ CPUnknownUserInfoKey        = @"CPUnknownUserInfoKey";
 
 - (id)valueForKey:(CPString)aKey
 {
-	return [self objectForKey:aKey];
+    if ([aKey hasPrefix:@"@"])
+        return [super valueForKey:aKey.substr(1)];
+
+    return [self objectForKey:aKey];
 }
 
 - (void)setValue:(id)aValue forKey:(CPString)aKey
