@@ -139,11 +139,55 @@
 
     [self setValue:@"BAR" forKey:@"FOO"];
 
-    [self assertTrue: FOO == [control stringValue] message: "should be equal, were: "+FOO+"and: "+[control stringValue]];
+    [self assert:FOO equals:[control stringValue]];
 
     [control setStringValue:@"pina colada"];
 
-    [self assertTrue: FOO == [control stringValue] message: "should be equal, were: "+FOO+"and: "+[control stringValue]];
+    //[self assert:FOO equals:[control stringValue]];
+}
+
+- (void)testTableColumn
+{
+    var tableView = [CPTableView new],
+        tableColumn = [[CPTableColumn alloc] initWithIdentifier:"A Column"],
+        arrayController = [CPArrayController new];
+
+    [tableView addTableColumn:tableColumn];
+
+    content = [
+        [AccessCounter counterWithValueA:"1" valueB:"2"],
+        [AccessCounter counterWithValueA:"3" valueB:"4"],
+        [AccessCounter counterWithValueA:"5" valueB:"6"],
+    ];
+    [arrayController setContent:content];
+
+    [tableColumn bind:@"value" toObject:arrayController withKeyPath:@"arrangedObjects.valueA" options:nil];
+
+    // Reset these if they were read during initialization.
+    for(var i=0; i<[content count];i++)
+        [content[i] setAccesses:0];
+    var testView = [DataViewTester new];
+    [tableColumn prepareDataView:testView forRow:0];
+    [self assert:'1' equals:testView.lastValue];
+    [self assert:'value' equals:testView.lastKey];
+
+    [tableColumn prepareDataView:testView forRow:1];
+    [self assert:'3' equals:testView.lastValue];
+    [self assert:'value' equals:testView.lastKey];
+
+    // Test that CPTableColumn is optimized to only read one value per row.
+    [self assert:0 equals:[content[2] accesses] message:"row 2 used "+[content[2] accesses]+" accesses but was never prepared"];
+    [self assert:1 equals:[content[0] accesses] message:"row 0 used "+[content[0] accesses]+" accesses to prepare"];
+    [self assert:1 equals:[content[1] accesses] message:"row 1 used "+[content[1] accesses]+" accesses to prepare"];
+
+    // Try the case where a key path is not used.
+    content = ["plain", "old", "space crystals"];
+    [tableColumn bind:@"value" toObject:arrayController withKeyPath:@"arrangedObjects" options:nil];
+    [arrayController setContent:content];
+
+    [tableColumn prepareDataView:testView forRow:1];
+    [self assert:'old' equals:testView.lastValue];
+    [self assert:'value' equals:testView.lastKey];
 }
 
 - (void)testTableColumn

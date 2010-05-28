@@ -270,6 +270,11 @@
     [self _setRepresentedObject:target];
 }
 
+- (void)removeObject:(id)anObject
+{
+    [self removeObject:anObject inRange:CPMakeRange(0, [self count])];
+}
+
 - (void)removeLastObject
 {
     if (_remove)

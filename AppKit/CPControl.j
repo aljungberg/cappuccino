@@ -129,7 +129,32 @@ var CPControlBlackColor     = [CPColor blackColor];
 
 + (void)initialize
 {
-    [self exposeBinding:"value"];
+    if (self === [CPControl class])
+    {
+        [self exposeBinding:@"value"];
+        [self exposeBinding:@"objectValue"];
+        [self exposeBinding:@"stringValue"];
+        [self exposeBinding:@"integerValue"];
+        [self exposeBinding:@"intValue"];
+        [self exposeBinding:@"doubleValue"];
+        [self exposeBinding:@"floatValue"];
+
+        [self exposeBinding:@"enabled"];
+    }
+}
+
+- (void)_reverseSetBinding
+{
+    var theBinding = [CPKeyValueBinding getBinding:CPValueBinding forObject:self];
+    [theBinding reverseSetValueFor:@"objectValue"];
+}
+
+- (void)_replacementKeyPathForBinding:(CPString)aBinding
+{
+    if (aBinding === @"value")
+        return @"objectValue";
+
+    return [super _replacementKeyPathForBinding:aBinding];
 }
 
 - (id)initWithFrame:(CGRect)aFrame
@@ -186,11 +211,7 @@ var CPControlBlackColor     = [CPColor blackColor];
 */
 - (void)sendAction:(SEL)anAction to:(id)anObject
 {
-    var theBinding = [CPKeyValueBinding getBinding:CPValueBinding forObject:self];
-
-    if (theBinding)
-        [theBinding reverseSetValueFor:@"objectValue"];
-
+    [self _reverseSetBinding];
     [CPApp sendAction:anAction to:anObject from:self];
 }
 
@@ -520,11 +541,7 @@ var CPControlBlackColor     = [CPColor blackColor];
     if([note object] != self)
         return;
 
-    var theBinding = [CPKeyValueBinding getBinding:CPValueBinding forObject:self];
-
-    if (theBinding)
-        [theBinding reverseSetValueFor:@"objectValue"];
-
+    [self _reverseSetBinding];
     [[CPNotificationCenter defaultCenter] postNotificationName:CPControlTextDidEndEditingNotification object:self userInfo:[CPDictionary dictionaryWithObject:[note object] forKey:"CPFieldEditor"]];
 }
 
@@ -579,22 +596,6 @@ BRIDGE(ImageScaling, imageScaling, "image-scaling")
 - (BOOL)isHighlighted
 {
     return [self hasThemeState:CPThemeStateHighlighted];
-}
-
-/*
-    Support the CPValueBinding binding.
-*/
-- (void)setValue:(id)aValue
-{
-    [self setObjectValue:aValue];
-}
-
-- (id)_replacementKeyPathForBinding:(CPString)binding
-{
-    if ([binding isEqual:@"value"])
-        return @"objectValue";
-
-    return binding;
 }
 
 @end

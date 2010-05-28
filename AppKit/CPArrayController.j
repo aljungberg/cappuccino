@@ -401,7 +401,7 @@
     if (_filterPredicate === nil || [_filterPredicate evaluateWithObject:object])
     {
         var pos = [_arrangedObjects insertObject:object inArraySortedByDescriptors:_sortDescriptors];
-        
+
         if (_selectsInsertedObjects)
         {
             [self setSelectionIndex:pos];
@@ -415,7 +415,7 @@
     }
     else
         [self rearrangeObjects];
-        
+
     if ([self avoidsEmptySelection] && [[self selectionIndexes] count] <= 0 && [_contentObject count] > 0)
         [self setSelectionIndexes:[CPIndexSet indexSetWithIndex:0]];
 }
