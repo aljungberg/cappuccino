@@ -77,3 +77,12 @@ var CPNullSharedNull = nil;
 }
 
 @end
+
+@implementation CPNull (CPFastEnumeration)
+
+- (int)countByEnumeratingWithState:(id)aState objects:(id)objects count:(id)aCount
+{
+    return 0;
+}
+
+@end

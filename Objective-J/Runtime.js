@@ -53,20 +53,20 @@ DISPLAY_NAME(objj_method);
 GLOBAL(objj_class) = function()
 {
     this.isa            = NULL;
-    
+
     this.super_class    = NULL;
     this.sub_classes    = [];
-    
+
     this.name           = NULL;
     this.info           = 0;
     this.ivars          = [];
-    
+
     this.method_list    = [];
     this.method_hash    = {};
-    
+
     this.method_store   = function() { };
     this.method_dtable  = this.method_store.prototype;
-    
+
     this.allocator      = function() { };
     this._UID           = -1;
 }
@@ -87,7 +87,7 @@ GLOBAL(class_getName) = function(/*Class*/ aClass)
 {
     if (aClass == Nil)
         return "";
-    
+
     return aClass.name;
 }
 
@@ -97,7 +97,7 @@ GLOBAL(class_isMetaClass) = function(/*Class*/ aClass)
 {
     if (!aClass)
         return NO;
-    
+
     return ISMETA(aClass);
 }
 
@@ -107,7 +107,7 @@ GLOBAL(class_getSuperclass) = function(/*Class*/ aClass)
 {
     if (aClass == Nil)
         return Nil;
-    
+
     return aClass.super_class;
 }
 
@@ -125,13 +125,13 @@ DISPLAY_NAME(class_setSuperclass);
 GLOBAL(class_addIvar) = function(/*Class*/ aClass, /*String*/ aName, /*String*/ aType)
 {
     var thePrototype = aClass.allocator.prototype;
-    
+
     if (typeof thePrototype[aName] != "undefined")
         return NO;
-    
-    aClass.ivars.push(new objj_ivar(aName, aType)); 
+
+    aClass.ivars.push(new objj_ivar(aName, aType));
     thePrototype[aName] = NULL;
-    
+
     return YES;
 }
 
@@ -142,7 +142,7 @@ GLOBAL(class_addIvars) = function(/*Class*/ aClass, /*Array*/ivars)
     var index = 0,
         count = ivars.length,
         thePrototype = aClass.allocator.prototype;
-        
+
     for (; index < count; ++index)
     {
         var ivar = ivars[index],
@@ -150,7 +150,7 @@ GLOBAL(class_addIvars) = function(/*Class*/ aClass, /*Array*/ivars)
 
         if (typeof thePrototype[name] === "undefined")
         {
-            aClass.ivars.push(ivar); 
+            aClass.ivars.push(ivar);
             thePrototype[name] = NULL;
         }
     }
@@ -173,10 +173,10 @@ GLOBAL(class_addMethod) = function(/*Class*/ aClass, /*SEL*/ aName, /*IMP*/ anIm
 {
     if (aClass.method_hash[aName])
         return NO;
-    
+
     var method = new objj_method(aName, anImplementation, types);
-    
-    aClass.method_list.push(method); 
+
+    aClass.method_list.push(method);
     aClass.method_dtable[aName] = method;
 
 #if DEBUG
@@ -198,18 +198,18 @@ GLOBAL(class_addMethods) = function(/*Class*/ aClass, /*Array*/ methods)
 {
     var index = 0,
         count = methods.length,
-        
+
         method_list = aClass.method_list,
         method_dtable = aClass.method_dtable;
-    
+
     for (; index < count; ++index)
     {
         var method = methods[index];
-        
+
         if (aClass.method_hash[method.name])
             continue;
-        
-        method_list.push(method); 
+
+        method_list.push(method);
         method_dtable[method.name] = method;
 
 #if DEBUG
@@ -229,9 +229,9 @@ GLOBAL(class_getInstanceMethod) = function(/*Class*/ aClass, /*SEL*/ aSelector)
 {
     if (!aClass || !aSelector)
         return NULL;
-    
+
     var method = aClass.method_dtable[aSelector];
-    
+
     return method ? method : NULL;
 }
 
@@ -243,7 +243,7 @@ GLOBAL(class_getClassMethod) = function(/*Class*/ aClass, /*SEL*/ aSelector)
         return NULL;
 
     var method = GETMETA(aClass).method_dtable[aSelector];
-    
+
     return method ? method : NULL;
 }
 
@@ -277,17 +277,17 @@ DISPLAY_NAME(class_replaceMethod);
 var _class_initialize = function(/*Class*/ aClass)
 {
     var meta = GETMETA(aClass);
-    
+
     if (GETINFO(aClass, CLS_META))
         aClass = objj_getClass(aClass.name);
-    
+
     if (aClass.super_class && !ISINITIALIZED(aClass.super_class))
         _class_initialize(aClass.super_class);
-    
+
     if (!GETINFO(meta, CLS_INITIALIZED) && !GETINFO(meta, CLS_INITIALIZING))
     {
         SETINFO(meta, CLS_INITIALIZING);
-        
+
         objj_msgSend(aClass, "initialize");
 
         CHANGEINFO(meta, CLS_INITIALIZED, CLS_INITIALIZING);
@@ -314,7 +314,7 @@ var _objj_forward = new objj_method("forward", function(self, _cmd)
 GLOBAL(class_getMethodImplementation) = function(/*Class*/ aClass, /*SEL*/ aSelector)
 {
     CLASS_GET_METHOD_IMPLEMENTATION(var implementation, aClass, aSelector);
-    
+
     return implementation;
 }
 
@@ -328,25 +328,25 @@ GLOBAL(objj_allocateClassPair) = function(/*Class*/ superclass, /*String*/ aName
     var classObject = new objj_class(),
         metaClassObject = new objj_class(),
         rootClassObject = classObject;
-    
+
     // If we don't have a superclass, we are the root class.
     if (superclass)
     {
         rootClassObject = superclass;
-        
+
         while (rootClassObject.superclass)
             rootClassObject = rootClassObject.superclass;
-        
+
         // Give our current allocator all the instance variables of our super class' allocator.
         classObject.allocator.prototype = new superclass.allocator;
-        
+
         // "Inheret" parent methods.
         classObject.method_store.prototype = new superclass.method_store;
         classObject.method_dtable = classObject.method_store.prototype;
-        
+
         metaClassObject.method_store.prototype = new superclass.isa.method_store;
         metaClassObject.method_dtable = metaClassObject.method_store.prototype;
-        
+
         // Set up the actual class hierarchy.
         classObject.super_class = superclass;
         metaClassObject.super_class = superclass.isa;
@@ -399,7 +399,7 @@ GLOBAL(class_createInstance) = function(/*Class*/ aClass)
 DISPLAY_NAME(class_createInstance);
 
 // Opera 9.5.1 has a bug where prototypes "inheret" members from instances when "with" is used.
-// Given that the Opera team is so fond of bug-testing instead of version-testing, we'll go 
+// Given that the Opera team is so fond of bug-testing instead of version-testing, we'll go
 // ahead and do that.
 
 var prototype_bug = function() { }
@@ -410,7 +410,7 @@ with (new prototype_bug())
     member = true;
 
 // If the bug exists, go down the slow path.
-if (new prototype_bug().member) 
+if (new prototype_bug().member)
 {
 
 var fast_class_createInstance = class_createInstance;
@@ -418,23 +418,23 @@ var fast_class_createInstance = class_createInstance;
 class_createInstance = function(/*Class*/ aClass)
 {
     var object = fast_class_createInstance(aClass);
-    
+
     if (object)
     {
         var theClass = object.isa,
             actualClass = theClass;
-    
+
         while (theClass)
         {
             var ivars = theClass.ivars;
                 count = ivars.length;
-            
+
             while (count--)
                 object[ivars[count].name] = NULL;
-                
+
             theClass = theClass.super_class;
         }
-        
+
         object.isa = actualClass;
     }
 
@@ -457,11 +457,11 @@ GLOBAL(object_getClassName) = function(/*id*/ anObject)
 
 DISPLAY_NAME(object_getClassName);
 
-//objc_getClassList  
+//objc_getClassList
 GLOBAL(objj_lookUpClass) = function(/*String*/ aName)
 {
     var theClass = REGISTERED_CLASSES[aName];
-    
+
     return theClass ? theClass : Nil;
 }
 
@@ -470,22 +470,22 @@ DISPLAY_NAME(objj_lookUpClass);
 GLOBAL(objj_getClass) = function(/*String*/ aName)
 {
     var theClass = REGISTERED_CLASSES[aName];
-    
+
     if (!theClass)
     {
         // class handler callback???
     }
-    
+
     return theClass ? theClass : Nil;
 }
 
 DISPLAY_NAME(objj_getClass);
 
-//objc_getRequiredClass  
+//objc_getRequiredClass
 GLOBAL(objj_getMetaClass) = function(/*String*/ aName)
 {
     var theClass = objj_getClass(aName);
-    
+
     return GETMETA(theClass);
 }
 
@@ -562,9 +562,9 @@ DISPLAY_NAME(method_getImplementation);
 GLOBAL(method_setImplementation) = function(/*Method*/ aMethod, /*IMP*/ anImplementation)
 {
     var oldImplementation = aMethod.method_imp;
-    
+
     aMethod.method_imp = anImplementation;
-    
+
     return oldImplementation;
 }
 
@@ -610,3 +610,106 @@ GLOBAL(sel_registerName) = function(/*String*/ aName)
 }
 
 DISPLAY_NAME(sel_registerName);
+
+var fastEnumerationSelector = sel_getUid("countByEnumeratingWithState:objects:count:");
+
+GLOBAL(objj_fastEnumerator) = function(/*Object*/ anObject, /*Integer*/ anAssigneeCount)
+{
+    // If this object doesn't respond to countByEnumeratingWithState:objects:count:
+    // (which is obviously the case for non-Objective-J objects), then just iterate
+    // this one object.
+    if (anObject && (!anObject.isa || !class_getInstanceMethod(anObject.isa, fastEnumerationSelector)))
+        this._target = [anObject];
+
+    // Else, use it's implementation.
+    else
+        this._target = anObject;
+
+    this._state = { state:0, assigneeCount:anAssigneeCount };
+    this._index = 0;
+
+    // Nothing to iterate in this case.
+    if (!anObject)
+    {
+        this.i = 0;
+        this.l = 0;
+    }
+    else
+        this.e();
+}
+
+objj_fastEnumerator.prototype.e = function()
+{
+    var object = this._target;
+
+    // Nothing to iterate, don't iterate
+    if (!object)
+        return NO;
+
+    var state = this._state,
+        index = state.assigneeCount;
+
+    while (index--)
+        state["items" + index] = nil;
+
+    this.i = 0;
+
+    // We optimize the array case.
+    if (CPArray && object.isa === CPArray)
+    {
+        if (this.l)
+            return NO;
+
+        this.o0 = object;
+        this.l = object.length;
+    }
+
+    else
+    {
+        // Clear out all the old state.
+        state.items = nil;
+        state.itemsPtr = nil;
+
+        this.o0 = [];
+        this.l = objj_msgSend(object, fastEnumerationSelector, state, this.o0, 16);
+
+        // We're flexible on this.
+        this.o0 = state.items || state.itemsPtr || state.items0 || this.o0;
+
+        // We allow the user to not explictly return anything in countByEnumeratingWithState:objects:count:
+        if (this.l === undefined)
+            this.l = this.o0.length;
+    }
+
+    var assigneeCount = state.assigneeCount;
+
+    index = assigneeCount - 1;
+
+    // Handle all items from [1 .. assigneeCount - 1]
+    while (index-- > 1)
+        this["o" + index] = state["items" + index] || [];
+
+    var lastAssigneeIndex = assigneeCount - 1;
+
+    // Autogenerate the indexes if this was left blank.
+    if (lastAssigneeIndex > 0)
+
+        if (state["items" + lastAssigneeIndex])
+            this["o" + lastAssigneeIndex] = state["items" + lastAssigneeIndex];
+
+        else
+        {
+            var count = this.l,
+                indexIndex = 0,
+                indexes = new Array(count)
+
+            for (; indexIndex < count; ++indexIndex, ++this._index)
+                indexes[indexIndex] = this._index;
+
+            this["o" + lastAssigneeIndex] = indexes;
+        }
+
+    // If this is the last iteration, set target to nil so that we don't call the
+    // fast enumeration method again.
+    return this.l > 0;
+}
