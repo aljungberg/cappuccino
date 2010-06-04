@@ -89,3 +89,4 @@
 @import "CPWebView.j"
 @import "CPWindow.j"
 @import "CPWindowController.j"
+@import "CPArrayController.j"
