@@ -76,6 +76,7 @@
 @import "CPTabView.j"
 @import "CPTableColumn.j"
 @import "CPTableView.j"
+@import "CPText.j"
 @import "CPTextField.j"
 @import "CPTokenField.j"
 @import "CPToolbar.j"
