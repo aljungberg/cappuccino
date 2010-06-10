@@ -801,7 +801,7 @@
 */
 - (CPArray)sortedArrayUsingSelector:(SEL)aSelector
 {
-    var sorted = [self copy]
+    var sorted = [self copy];
 
     [sorted sortUsingSelector:aSelector];
 
