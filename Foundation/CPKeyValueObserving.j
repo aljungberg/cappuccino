@@ -429,6 +429,11 @@ var kvoNewAndOld = CPKeyValueObservingOptionNew|CPKeyValueObservingOptionOld,
     }
     else
     {
+        // The isBefore path may not have been called as would happen if didChangeX
+        // was called alone.
+        if (!changes)
+            changes = [CPDictionary new];
+
         [changes removeObjectForKey:CPKeyValueChangeNotificationIsPriorKey];
 
         var indexes = [changes objectForKey:CPKeyValueChangeIndexesKey];
