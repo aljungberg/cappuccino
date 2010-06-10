@@ -105,14 +105,14 @@ var CPCompoundPredicateType;
     var subp = [CPArray array],
         count = [subp count];
         i;
-        
+
     for (i = 0; i < count; i++)
     {
         var p = [subp objectAtIndex:i];
         var sp = [p predicateWithSubstitutionVariables:variables];
         [subp addObject:sp];
     }
-    
+
     return [[CPCompoundPredicate alloc] initWithType:_type subpredicates:subp];
 }
 
@@ -122,27 +122,27 @@ var CPCompoundPredicateType;
         args = [CPArray array],
         count = [_predicates count],
         i;
-    
+
     if (count == 0)
     	return @"TRUPREDICATE";
-    
+
     for (i = 0; i < count; i++)
     {
         var subpredicate = [_predicates objectAtIndex:i];
         var precedence = [subpredicate predicateFormat];
-     
+
         if ([subpredicate isKindOfClass:[CPCompoundPredicate class]] && [[subpredicate subpredicates] count]> 1 && [subpredicate compoundPredicateType] != _type)
             precedence = [CPString stringWithFormat:@"(%s)",precedence];
-     
+
         if (precedence != nil)
             [args addObject:precedence];
     }
-      
+
     switch (_type)
     {
         case CPNotPredicateType:
             result += "NOT %s" + [args objectAtIndex:0];
-            break;     
+            break;
         case CPAndPredicateType:
             result += [args objectAtIndex:0];
             var count = [args count];
@@ -155,8 +155,8 @@ var CPCompoundPredicateType;
             for (var j = 1; j < count; j++)
                 result += " OR " + [args objectAtIndex:j];
             break;
-    }   
-   
+    }
+
     return result;
 }
 
@@ -170,14 +170,14 @@ var CPCompoundPredicateType;
     var result = NO,
         count = [_predicates count],
         i;
-        
+
     if (count == 0)
         return YES;
-    
+
     for (i = 0; i < count; i++)
     {
         var predicate = [_predicates objectAtIndex:i];
-    
+
         switch (_type)
         {
             case CPNotPredicateType:
@@ -187,14 +187,14 @@ var CPCompoundPredicateType;
                     result = [predicate evaluateWithObject:object substitutionVariables:variables];
                 else
                     result = result && [predicate evaluateWithObject:object substitutionVariables:variables];
-                break;      
+                break;
             case CPOrPredicateType:
                 if ([predicate evaluateWithObject:object substitutionVariables:variables])
                     return YES;
                 break;
         }
     }
-   
+
     return result;
 }
 
@@ -210,7 +210,7 @@ var CPCompoundPredicateType;
         _predicates = [coder decodeObjectForKey:@"CPCompoundPredicateSubpredicates"];
         _type = [coder decodeIntForKey:@"CPCompoundPredicateType"];
     }
-    
+
     return self;
 }
 
