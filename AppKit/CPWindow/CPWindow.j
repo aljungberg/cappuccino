@@ -1380,7 +1380,15 @@ CPTexturedBackgroundWindowMask
     switch (type)
     {
         case CPKeyUp:               return [[self firstResponder] keyUp:anEvent];
-        case CPKeyDown:             return [[self firstResponder] keyDown:anEvent];
+
+        case CPKeyDown:             [[self firstResponder] keyDown:anEvent];
+
+                                    // Trigger the default button if needed
+                                    if (![self disableKeyEquivalentForDefaultButton])
+                                        if ([anEvent _triggersKeyEquivalent:[[self defaultButton] keyEquivalent] withModifierMask:[[self defaultButton] keyEquivalentModifierMask]])
+                                            [[self defaultButton] performClick:self];
+
+                                    return;
 
         case CPScrollWheel:         return [[_windowView hitTest:point] scrollWheel:anEvent];
 
@@ -1945,10 +1953,16 @@ CPTexturedBackgroundWindowMask
         else
         {
             var mainMenu = [CPApp mainMenu],
-                menuWindow = mainMenu ? mainMenu._menuWindow : nil;
+                menuBarClass = objj_getClass("_CPMenuBarWindow"),
+                menuWindow;
+
             for (var i = 0; i < windowCount; i++)
             {
                 var currentWindow = allWindows[i];
+
+                if ([currentWindow isKindOfClass:menuBarClass])
+                    menuWindow = currentWindow;
+
                 if (currentWindow === self || currentWindow === menuWindow)
                     continue;
 
@@ -1974,10 +1988,16 @@ CPTexturedBackgroundWindowMask
         else
         {
             var mainMenu = [CPApp mainMenu],
-                menuWindow = mainMenu ? mainMenu._menuWindow : nil;
+                menuBarClass = objj_getClass("_CPMenuBarWindow"),
+                menuWindow;
+
             for (var i = 0; i < windowCount; i++)
             {
                 var currentWindow = allWindows[i];
+
+                if ([currentWindow isKindOfClass:menuBarClass])
+                    menuWindow = currentWindow;
+
                 if (currentWindow === self || currentWindow === menuWindow)
                     continue;
 
@@ -2242,7 +2262,7 @@ CPTexturedBackgroundWindowMask
     return NO;
 }
 
-- (void)performKeyEquivalent:(CPEvent)anEvent
+- (BOOL)performKeyEquivalent:(CPEvent)anEvent
 {
     // FIXME: should we be starting at the root, in other words _windowView?
     // The evidence seems to point to no...
@@ -2253,14 +2273,11 @@ CPTexturedBackgroundWindowMask
 {
     // It's not clear why we do performKeyEquivalent again here...
     // Perhaps to allow something to happen between sendEvent: and keyDown:?
-    if (![anEvent _couldBeKeyEquivalent] || ![self performKeyEquivalent:anEvent])
-        [self interpretKeyEvents:[anEvent]];
-}
+    if ([anEvent _couldBeKeyEquivalent] && [self performKeyEquivalent:anEvent])
+        return;
 
-- (void)insertNewline:(id)sender
-{
-    if (_defaultButton && _defaultButtonEnabled)
-        [_defaultButton performClick:nil];
+    // Interpret the key events
+    [self interpretKeyEvents:[anEvent]];
 }
 
 - (void)insertTab:(id)sender
@@ -2373,10 +2390,11 @@ CPTexturedBackgroundWindowMask
 
 - (void)setDefaultButton:(CPButton)aButton
 {
+    if (_defaultButton === aButton)
+        return;
+
     [_defaultButton setDefaultButton:NO];
-
     _defaultButton = aButton;
-
     [_defaultButton setDefaultButton:YES];
 }
 
