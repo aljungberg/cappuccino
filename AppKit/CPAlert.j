@@ -148,11 +148,11 @@ var CPAlertWarningImage,
     for(var i=0; i < count; i++)
     {
         var button = _buttons[i];
-
         [button setTheme:(_windowStyle === CPHUDBackgroundWindowMask) ? [CPTheme themeNamed:"Aristo-HUD"] : [CPTheme defaultTheme]];
 
         [[_alertPanel contentView] addSubview:button];
     }
+
     [self _layoutButtons];
 
     if (!_messageLabel)
@@ -162,6 +162,7 @@ var CPAlertWarningImage,
         [_messageLabel setLineBreakMode:CPLineBreakByWordWrapping];
         [_messageLabel setAlignment:CPJustifiedTextAlignment];
         [_messageLabel setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
+
 
         _alertImageView = [[CPImageView alloc] initWithFrame:CGRectMake(15.0, 12.0, 32.0, 32.0)];
 
