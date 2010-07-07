@@ -33,6 +33,9 @@ CPUndefinedKeyException     = @"CPUndefinedKeyException";
 CPTargetObjectUserInfoKey   = @"CPTargetObjectUserInfoKey";
 CPUnknownUserInfoKey        = @"CPUnknownUserInfoKey";
 
+var CPObjectAccessorsForClassKey = @"$CPObjectAccessorsForClassKey",
+    CPObjectModifiersForClassKey = @"$CPObjectModifiersForClassKey";
+
 @implementation CPObject (CPKeyValueCoding)
 
 + (BOOL)accessInstanceVariablesDirectly
@@ -43,12 +46,8 @@ CPUnknownUserInfoKey        = @"CPUnknownUserInfoKey";
 /* @ignore */
 + (SEL)_accessorForKey:(CPString)aKey
 {
-    if (!CPObjectAccessorsForClass)
-        CPObjectAccessorsForClass = {}
-
-    var UID = [isa UID],
-        selector = nil,
-        accessors = CPObjectAccessorsForClass[UID];
+    var selector = nil,
+        accessors = isa[CPObjectAccessorsForClassKey];
 
     if (accessors)
     {
@@ -58,11 +57,7 @@ CPUnknownUserInfoKey        = @"CPUnknownUserInfoKey";
             return selector === [CPNull null] ? nil : selector;
     }
     else
-    {
-        accessors = {}
-        CPObjectAccessorsForClass[UID] = accessors;
-    }
-
+        accessors = isa[CPObjectAccessorsForClassKey] = {};
 
     var capitalizedKey = aKey.charAt(0).toUpperCase() + aKey.substr(1);
 
