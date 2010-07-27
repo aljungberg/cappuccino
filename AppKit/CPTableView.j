@@ -2172,7 +2172,7 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
             if (sortedKeyPath === observedKey)
             {
                 // Update indicator image & highlighted column before
-                var image = [mainSortDescriptor ascending] ? [CPTableView _defaultTableHeaderSortImage] : [CPTableView _defaultTableHeaderReverseSortImage];
+                var image = [mainSortDescriptor ascending] ? [self _tableHeaderSortImage] : [self _tableHeaderReverseSortImage];
 
                 [self setIndicatorImage:nil inTableColumn:_currentHighlightedTableColumn];
                 [self setIndicatorImage:image inTableColumn:tableColumn];
