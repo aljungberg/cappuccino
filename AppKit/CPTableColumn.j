@@ -89,11 +89,11 @@ CPTableColumnUserResizingMask   = 1 << 1;
 
         var textDataView = [CPTextField new];
 
-        [textDataView setValue:[CPColor colorWithRed:51.0 / 255.0 green:51.0 / 255.0 blue:51.0 / 255.0 alpha:1.0] 
+        [textDataView setValue:[CPColor colorWithRed:51.0 / 255.0 green:51.0 / 255.0 blue:51.0 / 255.0 alpha:1.0]
           forThemeAttribute:"text-color"];
 
         [textDataView setValue:[CPColor whiteColor] forThemeAttribute:@"text-color" inState:CPThemeStateSelectedDataView];
-        [textDataView setLineBreakMode:CPLineBreakByTruncatingTail];  
+        [textDataView setLineBreakMode:CPLineBreakByTruncatingTail];
         [textDataView setValue:[CPFont boldSystemFontOfSize:12.0] forThemeAttribute:@"font" inState:CPThemeStateSelectedDataView];
         [textDataView setValue:CPCenterVerticalTextAlignment forThemeAttribute:@"vertical-alignment"];
         [textDataView setValue:CGInsetMake(0.0, 0.0, 0.0, 5.0) forThemeAttribute:@"content-inset"];
@@ -365,9 +365,9 @@ CPTableColumnUserResizingMask   = 1 << 1;
     shouldBeHidden = !!shouldBeHidden
     if (_isHidden === shouldBeHidden)
         return;
-    
+
     _isHidden = shouldBeHidden;
-    
+
     [[self headerView] setHidden:shouldBeHidden];
     [[self tableView] _tableColumnVisibilityDidChange:self];
 }
@@ -430,7 +430,8 @@ CPTableColumnUserResizingMask   = 1 << 1;
     {
         var bindingName = keys[i],
             bindingPath = [aDataView _replacementKeyPathForBinding:bindingName],
-            bindingInfo = [bindingsDictionary objectForKey:bindingName]._info,
+            binding = [bindingsDictionary objectForKey:bindingName],
+            bindingInfo = binding._info,
             destination = [bindingInfo objectForKey:CPObservedObjectKey],
             keyPath = [bindingInfo objectForKey:CPObservedKeyPathKey],
             dotIndex = keyPath.lastIndexOf("."),
@@ -460,6 +461,8 @@ CPTableColumnUserResizingMask   = 1 << 1;
             else
                 value = [[firstValue valueForKeyPath:secondPart] objectAtIndex:aRow];
         }
+
+        value = [binding transformValue:value withOptions:[bindingInfo objectForKey:CPOptionsKey]];
 
         // console.log(bindingName+" : "+keyPath+" : "+aRow+" : "+[[destination valueForKeyPath:keyPath] objectAtIndex:aRow]);
         [aDataView setValue:value forKey:bindingPath];
@@ -510,7 +513,7 @@ var CPTableColumnIdentifierKey   = @"CPTableColumnIdentifierKey",
 
         _resizingMask  = [aCoder decodeBoolForKey:CPTableColumnResizingMaskKey];
         _isHidden = [aCoder decodeBoolForKey:CPTableColumnIsHiddenkey];
-        
+
         _sortDescriptorPrototype = [aCoder decodeObjectForKey:CPSortDescriptorPrototypeKey];
     }
 
@@ -530,7 +533,7 @@ var CPTableColumnIdentifierKey   = @"CPTableColumnIdentifierKey",
 
     [aCoder encodeObject:_resizingMask forKey:CPTableColumnResizingMaskKey];
     [aCoder encodeBool:_isHidden forKey:CPTableColumnIsHiddenkey];
-    
+
     [aCoder encodeObject:_sortDescriptorPrototype forKey:CPSortDescriptorPrototypeKey];
 }
 
