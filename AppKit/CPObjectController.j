@@ -452,7 +452,7 @@ var CPObjectControllerObjectClassNameKey                = @"CPObjectControllerOb
             [self didChangeValueForKey:keyPath];
     }
 
-    [self removeObjectAtIndex:anIndex];
+    [super removeObjectAtIndex:anIndex];
 }
 
 - (_CPObservableArray)objectsAtIndexes:(CPIndexSet)theIndexes
