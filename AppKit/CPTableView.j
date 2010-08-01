@@ -1510,10 +1510,9 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
     var superviewSize = [superview bounds].size;
 
-    if (_dirtyTableColumnRangeIndex !== CPNotFound)
-        [self _recalculateTableColumnRanges];//UPDATE_COLUMN_RANGES_IF_NECESSARY();
+    UPDATE_COLUMN_RANGES_IF_NECESSARY();
 
-    var count = _tableColumns.length,//NUMBER_OF_COLUMNS(),
+    var count = NUMBER_OF_COLUMNS(),
         visColumns = [[CPArray alloc] init],
         buffer = 0.0;
 
@@ -1629,10 +1628,10 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
 - (void)noteNumberOfRowsChanged
 {
+    var oldNumberOfRows = _numberOfRows;
+
     _numberOfRows = nil;
     _numberOfRows = [self numberOfRows];
-
-    var oldNumberOfRows = _numberOfRows;
 
     // remove row indexes from the selection if they no longer exist
     var hangingSelections = oldNumberOfRows - _numberOfRows;
