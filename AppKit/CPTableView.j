@@ -1450,11 +1450,11 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 
     var mask = _columnAutoResizingStyle;
 
-    if(mask === CPTableViewUniformColumnAutoresizingStyle)
+    if (mask === CPTableViewUniformColumnAutoresizingStyle)
        [self _resizeAllColumnUniformlyWithOldSize:aSize];
-    else if(mask === CPTableViewLastColumnOnlyAutoresizingStyle)
+    else if (mask === CPTableViewLastColumnOnlyAutoresizingStyle)
         [self sizeLastColumnToFit];
-    else if(mask === CPTableViewFirstColumnOnlyAutoresizingStyle)
+    else if (mask === CPTableViewFirstColumnOnlyAutoresizingStyle)
         [self _autoResizeFirstColumn];
 }
 
@@ -1462,114 +1462,116 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
 {
     var superview = [self superview];
 
-     if (!superview)
-         return;
+    if (!superview)
+        return;
 
-     var superviewSize = [superview bounds].size;
+    var superviewSize = [superview bounds].size;
 
-     UPDATE_COLUMN_RANGES_IF_NECESSARY();
+    UPDATE_COLUMN_RANGES_IF_NECESSARY();
 
-     var count = NUMBER_OF_COLUMNS(),
-         visColumns = [[CPArray alloc] init],
-         totalWidth = 0,
-         i = 0;
+    var count = NUMBER_OF_COLUMNS(),
+        visColumns = [[CPArray alloc] init],
+        totalWidth = 0,
+        i = 0;
 
-     for(; i < count; i++)
-     {
-         if(![_tableColumns[i] isHidden])
-         {
+    for(; i < count; i++)
+    {
+        if(![_tableColumns[i] isHidden])
+        {
              [visColumns addObject:i];
-             totalWidth += [_tableColumns[i] width];
-         }
-     }
+             totalWidth += [_tableColumns[i] width] + _intercellSpacing.width;
+        }
+    }
 
-     count = [visColumns count];
+    count = [visColumns count];
 
-     //if there are rows
-     if (count > 0)
-     {
-         var columnToResize = _tableColumns[visColumns[0]];
-         var newWidth = superviewSize.width - totalWidth;// - [columnToResize width];
-         newWidth += [columnToResize width];
-         newWidth = (newWidth < [columnToResize minWidth]) ? [columnToResize minWidth] : newWidth;
-         newWidth = (newWidth > [columnToResize maxWidth]) ? [columnToResize maxWidth] : newWidth;
+    //if there are rows
+    if (count > 0)
+    {
+        var columnToResize = _tableColumns[visColumns[0]],
+            newWidth = superviewSize.width - totalWidth;// - [columnToResize width];
 
-         [columnToResize setWidth:FLOOR(newWidth)];
-     }
+        newWidth += [columnToResize width];
+        newWidth = MAX([columnToResize minWidth], newWidth);
+        newWidth = MIN([columnToResize maxWidth], newWidth);
 
-     [self setNeedsLayout];
+        [columnToResize setWidth:FLOOR(newWidth)];
+    }
+
+    [self setNeedsLayout];
 }
 
 - (void)_resizeAllColumnUniformlyWithOldSize:(CGSize)oldSize
 {
-        var superview = [self superview];
+    var superview = [self superview];
 
-        if (!superview)
+    if (!superview)
+        return;
+
+    var superviewSize = [superview bounds].size;
+
+    if (_dirtyTableColumnRangeIndex !== CPNotFound)
+        [self _recalculateTableColumnRanges];//UPDATE_COLUMN_RANGES_IF_NECESSARY();
+
+    var count = _tableColumns.length,//NUMBER_OF_COLUMNS(),
+        visColumns = [[CPArray alloc] init],
+        buffer = 0.0;
+
+    // Fixme: cache resizable columns because they won't changes betwwen two calls to this method.
+    for (var i=0; i < count; i++)
+    {
+        var tableColumn = _tableColumns[i];
+        if(![tableColumn isHidden] && ([tableColumn resizingMask] & CPTableColumnAutoresizingMask))
+            [visColumns addObject:i];
+    }
+
+    // redefine count
+    count = [visColumns count];
+
+    //if there are columns
+    if (count > 0)
+    {
+        var maxXofColumns = CGRectGetMaxX([self rectOfColumn:visColumns[count - 1]]);
+
+        // If the x value of the end of the last column is between the current bounds and the previous bounds we should snap.
+        if (!_lastColumnShouldSnap && (maxXofColumns >= superviewSize.width && maxXofColumns <= oldSize.width || maxXofColumns <= superviewSize.width && maxXofColumns >= oldSize.width))
+        {
+            //set the snap mask
+            _lastColumnShouldSnap = YES;
+            //then we need to make sure everything is set correctly.
+            [self _resizeAllColumnUniformlyWithOldSize:CGSizeMake(maxXofColumns, 0)];
+        }
+
+        if (!_lastColumnShouldSnap)
             return;
 
-        var superviewSize = [superview bounds].size;
+        // FIX ME: This is wrong because this should continue to resize all columns
+        // If the last column reaches it's max/min it will simply stop resizing,
+        // correct behavior is to resize all columns until they reach their min/max
 
-        if (_dirtyTableColumnRangeIndex !== CPNotFound) [self _recalculateTableColumnRanges];//UPDATE_COLUMN_RANGES_IF_NECESSARY();
-
-        var count = _tableColumns.length,//NUMBER_OF_COLUMNS(),
-            visColumns = [[CPArray alloc] init],
-            buffer = 0.0;
-
-        // Fixme: cache resizable columns because they won't changes betwwen two calls to this method.
-        for(var i=0; i < count; i++)
+        for (var i = 0; i < count; i++)
         {
-            var tableColumn = _tableColumns[i];
-            if(![tableColumn isHidden] && ([tableColumn resizingMask] & CPTableColumnAutoresizingMask))
-                [visColumns addObject:i];
+            var column = visColumns[i],
+                columnToResize = _tableColumns[column],
+                currentBuffer = buffer / (count - i),
+                realNewWidth = ([columnToResize width] / oldSize.width * [superview bounds].size.width) + currentBuffer,
+                newWidth = realNewWidth;
+            newWidth = MAX([columnToResize minWidth], newWidth);
+            newWidth = MIN([columnToResize maxWidth], newWidth);
+            buffer -= currentBuffer;
+
+            // the buffer takes into account the min/max width of the column
+            buffer += realNewWidth - newWidth;
+
+            [columnToResize setWidth:newWidth];
         }
 
-        // redefine count
-        count = [visColumns count];
+        // if there is space left over that means column resize was too long or too short
+        if (buffer !== 0)
+            _lastColumnShouldSnap = NO;
+    }
 
-        //if there are columns
-        if (count > 0)
-        {
-            var maxXofColumns = CGRectGetMaxX([self rectOfColumn:visColumns[count - 1]]);
-
-            // If the x value of the end of the last column is between the current bounds and the previous bounds we should snap.
-            if (!_lastColumnShouldSnap && (maxXofColumns >= superviewSize.width && maxXofColumns <= oldSize.width || maxXofColumns <= superviewSize.width && maxXofColumns >= oldSize.width))
-            {
-                //set the snap mask
-                _lastColumnShouldSnap = YES;
-                //then we need to make sure everything is set correctly.
-                [self _resizeAllColumnUniformlyWithOldSize:CGSizeMake(maxXofColumns, 0)];
-            }
-
-            if(!_lastColumnShouldSnap)
-                return;
-
-
-            // FIX ME: This is wrong because this should continue to resize all columns
-            // If the last column reaches it's max/min it will simply stop resizing,
-            // correct behavior is to resize all columns until they reach their min/max
-
-            for (var i = 0; i < count; i++)
-            {
-                var column = visColumns[i];
-                    columnToResize = _tableColumns[column],
-                    currentBuffer = buffer / (count - i),
-                    realNewWidth = ([columnToResize width] / oldSize.width * [superview bounds].size.width) + currentBuffer ,
-                    newWidth = MAX([columnToResize minWidth], realNewWidth);
-                    newWidth = MIN([columnToResize maxWidth], realNewWidth);
-                buffer -= currentBuffer;
-
-                // the buffer takes into account the min/max width of the column
-                buffer += realNewWidth - newWidth;
-
-                [columnToResize setWidth:newWidth];
-            }
-
-            // if there is space left over that means column resize was too long or too short
-            if(buffer !== 0)
-                _lastColumnShouldSnap = NO;
-        }
-
-        [self setNeedsLayout];
+    [self setNeedsLayout];
 }
 
 /*!
@@ -1611,8 +1613,8 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
     //if the last row exists
     if (count >= 0)
     {
-        var columnToResize = _tableColumns[count];
-        var newSize = MAX(0.0, superviewSize.width - CGRectGetMinX([self rectOfColumn:count]));
+        var columnToResize = _tableColumns[count],
+            newSize = MAX(0.0, superviewSize.width - CGRectGetMinX([self rectOfColumn:count]) - _intercellSpacing.width);
 
         if (newSize > 0)
         {
