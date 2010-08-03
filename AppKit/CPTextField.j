@@ -269,11 +269,18 @@ CPTextFieldStatePlaceholder = CPThemeState("placeholder");
 #pragma mark Controlling Editability and Selectability
 
 /*!
-    Sets whether or not the receiver text field can be edited
+    Sets whether or not the receiver text field can be edited. If NO, any
+    ongoing edit is ended.
 */
 - (void)setEditable:(BOOL)shouldBeEditable
 {
+    if (_isEditable === shouldBeEditable)
+        return;
+
     _isEditable = shouldBeEditable;
+    // We only allow first responder status if the field is editable and enabled.
+    if (!shouldBeEditable && [[self window] firstResponder] === self)
+        [[self window] makeFirstResponder:nil];
 }
 
 /*!
@@ -282,6 +289,19 @@ CPTextFieldStatePlaceholder = CPThemeState("placeholder");
 - (BOOL)isEditable
 {
     return _isEditable;
+}
+
+/*!
+    Sets whether the field reacts to events. If NO, any ongoing edit is
+    ended.
+*/
+- (void)setEnabled:(BOOL)shouldBeEnabled
+{
+    [super setEnabled:shouldBeEnabled];
+
+    // We only allow first responder status if the field is editable and enabled.
+    if (!shouldBeEnabled && [[self window] firstResponder] === self)
+        [[self window] makeFirstResponder:nil];
 }
 
 /*!
