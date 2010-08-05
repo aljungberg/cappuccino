@@ -19,6 +19,7 @@
 - (id)initWithCoder:(CPCoder)coder
 {
     var keyPath = [coder decodeObjectForKey:@"CPExpressionKeyPath"];
+    
     return [self initWithKeyPath:keyPath];
 }
 

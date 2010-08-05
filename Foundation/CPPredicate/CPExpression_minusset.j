@@ -66,7 +66,8 @@
 {
     return _left;
 }
-- (CPExpression)leftExpression
+
+- (CPExpression)rightExpression
 {
     return _right;
 }

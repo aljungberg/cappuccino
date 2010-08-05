@@ -6,8 +6,8 @@
 
 @implementation CPExpression_assignment: CPExpression
 {
-    CPExpression_variable 	_assignmentVariable;
-    CPExpression 			_subexpression;
+    CPExpression_variable   _assignmentVariable;
+    CPExpression            _subexpression;
 }
 
 - (id)initWithAssignmentVariable:(CPString)variable expression:(CPExpression)expression

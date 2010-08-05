@@ -801,7 +801,7 @@ var normalized = [65,97,99,101,105,111,117];
 String.prototype.stripDiacritics = function ()
 {
     var output = "";
-     for (var indexSource = 0; indexSource < this.length; indexSource++)
+    for (var indexSource = 0; indexSource < this.length; indexSource++)
     {
         var code = this.charCodeAt(indexSource);
 

@@ -6,10 +6,10 @@
 
 @implementation CPExpression_function : CPExpression
 {
-    CPExpression	_operand;
-    SEL      		_selector;
-    CPArray  		_arguments;
-    int      		_argc;
+    CPExpression    _operand;
+    SEL             _selector;
+    CPArray         _arguments;
+    int             _argc;
 }
 
 - (id)initWithSelector:(SEL)aselector arguments:(CPArray)parameters
@@ -45,8 +45,7 @@
 
 - (id)initWithCoder:(CPCoder)coder
 {
-    var name = [coder decodeObjectForKey:@"CPExpressionFunctionName"];
-    var selector = CPSelectorFromString(name);
+    var selector = CPSelectorFromString([coder decodeObjectForKey:@"CPExpressionFunctionName"]);
     var arguments = [coder decodeObjectForKey:@"CPExpressionFunctionArguments"];
     
     return [self initWithSelector:selector arguments:arguments];
@@ -136,7 +135,7 @@
         [CPException raise:CPInvalidArgumentException reason:"Invalid number of parameters"];
     
     var i,
-    sum = 0.0;
+        sum = 0.0;
     
     for (i = 0; i < _argc; i++)
         sum += [[parameters objectAtIndex:i] doubleValue];
@@ -174,12 +173,10 @@
         [CPException raise:CPInvalidArgumentException reason:"Invalid number of parameters"];
     
     var i,
-    sum = 0.0;
+        sum = 0.0;
     
     for (i = 0; i < _argc; i++)
-    {
         sum += [[parameters objectAtIndex:i] doubleValue];
-    }
     
     return [CPNumber numberWithDouble: sum / _argc];
 }
@@ -211,8 +208,8 @@
     if (_argc != 2)
       [CPException raise:CPInvalidArgumentException reason:"Invalid number of parameters"];
     
-    var   left = [parameters objectAtIndex:0],
-          right = [parameters objectAtIndex:1];
+    var left = [parameters objectAtIndex:0],
+        right = [parameters objectAtIndex:1];
     
     return [CPNumber numberWithDouble: [left doubleValue] * [right doubleValue]];
 }
@@ -243,8 +240,8 @@
     if (_argc < 2)
         [CPException raise:CPInvalidArgumentException reason:"Invalid number of parameters"];
     
-    var num = [[parameters objectAtIndex:0] doubleValue];
-    var power = [[parameters objectAtIndex:1] doubleValue];
+    var num = [[parameters objectAtIndex:0] doubleValue],
+        power = [[parameters objectAtIndex:1] doubleValue];
     
     return [CPNumber numberWithDouble: POW(num,power)];    
 }
@@ -340,8 +337,8 @@
     if (_argc < 2)
         [CPException raise:CPInvalidArgumentException reason:"Invalid number of parameters"];
     
-    var left = [parameters objectAtIndex:0];
-    var right = [parameters objectAtIndex:1];
+    var left = [parameters objectAtIndex:0],
+        right = [parameters objectAtIndex:1];
     
     if ([left isKindOfClass: [CPDictionary class]])
         return [left objectForKey:right];

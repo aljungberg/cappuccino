@@ -56,7 +56,8 @@
         item;
         
     while (item = [e nextObject])
-        if ([left containsObject:item])[set addObject:item];
+        if ([left containsObject:item])
+            [set addObject:item];
 
     return [CPExpression expressionForConstantValue:set];
 }
@@ -70,7 +71,8 @@
 {
     return _left;
 }
-- (CPExpression)leftExpression
+
+- (CPExpression)rightExpression
 {
     return _right;
 }

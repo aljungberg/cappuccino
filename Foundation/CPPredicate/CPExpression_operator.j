@@ -19,7 +19,7 @@ var CPExpressionOperatorIndexSize = "CPExpressionOperatorIndexSize";
 
 @implementation CPExpression_operator : CPExpression
 {
-    int 	_operator;
+    int     _operator;
     CPArray _arguments;
 }
 
@@ -49,8 +49,8 @@ var CPExpressionOperatorIndexSize = "CPExpressionOperatorIndexSize";
     
     for (i = 0; i < count; i++)
     {
-        var check = [_arguments objectAtIndex:i];
-        var precedence = [check description];
+        var check = [_arguments objectAtIndex:i],
+            precedence = [check description];
         
         if ([check isKindOfClass:[CPExpression_operator class]])
             precedence = [CPString stringWithFormat:@"(%@)", precedence];
@@ -103,7 +103,7 @@ var CPExpressionOperatorIndexSize = "CPExpressionOperatorIndexSize";
 
 - (CPExpression)_expressionWithSubstitutionVariables:(CPDictionary)variables
 {
-    var  array = [CPArray array],
+    var array = [CPArray array],
         count = [_arguments count],
         i;
     

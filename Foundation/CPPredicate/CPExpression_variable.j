@@ -12,6 +12,7 @@
 {
     [super initWithExpressionType:CPVariableExpressionType];
     _variable = [variable copy];
+    
     return self;
 }
 

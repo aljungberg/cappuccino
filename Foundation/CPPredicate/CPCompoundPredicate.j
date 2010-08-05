@@ -48,6 +48,7 @@ var CPCompoundPredicateType;
 {
     _type = type;
     _predicates = predicates;
+
     return self;
 }
 
@@ -108,8 +109,9 @@ var CPCompoundPredicateType;
 
     for (i = 0; i < count; i++)
     {
-        var p = [subp objectAtIndex:i];
-        var sp = [p predicateWithSubstitutionVariables:variables];
+        var p = [subp objectAtIndex:i],
+            sp = [p predicateWithSubstitutionVariables:variables];
+
         [subp addObject:sp];
     }
 
@@ -128,8 +130,8 @@ var CPCompoundPredicateType;
 
     for (i = 0; i < count; i++)
     {
-        var subpredicate = [_predicates objectAtIndex:i];
-        var precedence = [subpredicate predicateFormat];
+        var subpredicate = [_predicates objectAtIndex:i],
+            precedence = [subpredicate predicateFormat];
 
         if ([subpredicate isKindOfClass:[CPCompoundPredicate class]] && [[subpredicate subpredicates] count]> 1 && [subpredicate compoundPredicateType] != _type)
             precedence = [CPString stringWithFormat:@"(%s)",precedence];

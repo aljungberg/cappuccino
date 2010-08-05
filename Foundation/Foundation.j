@@ -33,6 +33,7 @@
 @import "CPException.j"
 @import "CPExpression.j"
 @import "CPFormatter.j"
+@import "CPExpression.j"
 @import "CPIndexSet.j"
 @import "CPInvocation.j"
 @import "CPJSONPConnection.j"

@@ -45,7 +45,7 @@ CPIntersectSetExpressionType = 8;
 */
 CPMinusSetExpressionType = 9;
 
-/*! 
+/*!
     @ingroup foundation
     @class CPExpression
     @brief CPExpression is used to represent expressions in a predicate.
@@ -69,6 +69,7 @@ CPMinusSetExpressionType = 9;
 - (id)initWithExpressionType:(int)type
 {
     _type = type;
+
     return self;
 }
 
@@ -140,7 +141,7 @@ CPMinusSetExpressionType = 9;
     @param right An expression that evaluates to a collection object (an instance of CPArray, CPSet, or CPDictionary).
     @return A new CPExpression object that represents the intersection of left and right.
 */
-+ (CPExpression)expressionForIntersectSetSet:(CPExpression)left with:(CPExpression)right
++ (CPExpression)expressionForIntersectSet:(CPExpression)left with:(CPExpression)right
 {
     return [[CPExpression_intersectset alloc] initWithLeft:left right:right];
 }
@@ -166,9 +167,9 @@ CPMinusSetExpressionType = 9;
 
     If there is a mismatch between the number of parameters expected and the number you provide during evaluation, an exception may be raised or missing parameters may simply be replaced by nil (which occurs depends on how many parameters are provided, and whether you have over- or underflow).
     @return A new expression that invokes the function name using the parameters in parameters.
-	
-	The name parameter can be one of the following predefined functions:
- @verbatim  
+
+    The name parameter can be one of the following predefined functions:
+ @verbatim
     name              parameter array contents                           returns
    -------------------------------------------------------------------------------------------------------------------------------------
     sum:              CPExpression instances representing numbers        CPNumber
@@ -195,7 +196,7 @@ CPMinusSetExpressionType = 9;
     trunc:            one CPExpression instance representing a number    CPNumber
     uppercase:        one CPExpression instance representing a string    CPString
     lowercase:        one CPExpression instance representing a string    CPString
-    random            none                                               CPNumber (integer) 
+    random            none                                               CPNumber (integer)
     random:           one CPExpression instance representing a number    CPNumber (integer) such that 0 <= rand < param
     now               none                                               [CPDate now]
     bitwiseAnd:with:  two CPExpression instances representing numbers    CPNumber    (numbers will be treated as CPInteger)
@@ -210,7 +211,7 @@ CPMinusSetExpressionType = 9;
 */
 + (CPExpression)expressionForFunction:(CPString)function_name arguments:(CPArray)parameters
 {
-    return [[CPExpression_function alloc] initWithSelector:CPSelectorFromString(function_name) arguments:parameters];     
+    return [[CPExpression_function alloc] initWithSelector:CPSelectorFromString(function_name) arguments:parameters];
 }
 
 /*!
@@ -223,7 +224,7 @@ CPMinusSetExpressionType = 9;
 */
 + (CPExpression)expressionForFunction:(CPExpression)target selectorName:(CPString)function_name arguments:(CPArray)parameters
 {
-    return [[CPExpression_function alloc] initWithTarget:target selector:CPSelectorFromString(function_name) arguments:parameters];     
+    return [[CPExpression_function alloc] initWithTarget:target selector:CPSelectorFromString(function_name) arguments:parameters];
 }
 
 

@@ -1,6 +1,7 @@
 
 @import <Foundation/CPValue.j>
 @import <Foundation/CPArray.j>
+@import <Foundation/CPSet.j>
 @import <Foundation/CPNull.j>
 @import <Foundation/CPScanner.j>
 
@@ -36,7 +37,6 @@
     @param … A comma-separated list of arguments to substitute into format.
     @return A new predicate formed by creating a new string with format and parsing the result.
 */
-
 + (CPPredicate)predicateWithFormat:(CPString) format, ...
 {
     if (!format)
@@ -57,8 +57,8 @@
     if (!format)
         [CPException raise:CPInvalidArgumentException reason:_cmd + " the format can't be 'nil'"];
 
-    var s = [[CPPredicateScanner alloc] initWithString:format args:arguments];
-    var p = [s parse];
+    var s = [[CPPredicateScanner alloc] initWithString:format args:arguments],
+        p = [s parse];
 
     return p;
 }
@@ -103,7 +103,7 @@
 */
 - (BOOL)evaluateWithObject:(id)object
 {
-  // IMPLEMENTED BY SUBCLASSES
+    // IMPLEMENTED BY SUBCLASSES
 }
 
 /*!
@@ -114,7 +114,7 @@
 */
 - (BOOL)evaluateWithObject:(id)object substitutionVariables:(CPDictionary)variables
 {
-  // IMPLEMENTED BY SUBCLASSES
+    // IMPLEMENTED BY SUBCLASSES
 }
 
 // Getting Format Information
@@ -183,22 +183,55 @@
 
     while (count--)
     {
-        var check = [self objectAtIndex:count];
+        var object = [self objectAtIndex:count];
 
-        if (![predicate evaluateWithObject:check])
+        if (![predicate evaluateWithObject:object])
             [self removeObjectAtIndex:count];
     }
 }
 
 @end
 
+@implementation CPSet (CPPredicate)
+
+- (CPSet)filteredSetUsingPredicate:(CPPredicate)predicate
+{
+    var count = [self count],
+        result = [CPSet set],
+        i;
+
+    for (i = 0; i < count; i++)
+    {
+        var object = [self objectAtIndex:i];
+
+        if ([predicate evaluateWithObject:object])
+            [result addObject:object];
+    }
+
+    return result;
+}
+
+- (void)filterUsingPredicate:(CPPredicate)predicate
+{
+    var count = [self count];
+
+    while (--count >= 0)
+    {
+        var object = [self objectAtIndex:count];
+
+        if (![predicate evaluateWithObject:object])
+            [self removeObjectAtIndex:count];
+    }
+}
+
+@end
 
 #define REFERENCE(variable) \
 function(newValue)\
 {\
     var oldValue = variable;\
     if (typeof newValue != 'undefined')\
-    variable = newValue;\
+        variable = newValue;\
     return oldValue;\
 }
 
@@ -260,7 +293,7 @@ function(newValue)\
     finally
     {
         if (![self isAtEnd])
-        CPLogConsole(@"Format string contains extra characters: \""+[self string]+"\"");
+            CPLogConsole(@"Format string contains extra characters: \""+[self string]+"\"");
     }
 
     return r;
@@ -310,7 +343,7 @@ function(newValue)\
         var r = [self parsePredicate];
 
         if (![self scanString:@")" intoString:NULL])
-        [CPException raise:CPInvalidArgumentException reason:@"Missing ) in compound predicate"];
+            [CPException raise:CPInvalidArgumentException reason:@"Missing ) in compound predicate"];
 
         return r;
     }
@@ -444,11 +477,11 @@ function(newValue)\
     }
     else if ([self scanPredicateKeyword:@"BETWEEN"])
     {
-        var exp = [self parseSimpleExpression];
-        var a = [exp constantValue];
-        var lower, upper;
-        var lexp, uexp;
-        var lp, up;
+        var exp = [self parseSimpleExpression],
+            a = [exp constantValue],
+            lower, upper,
+            lexp, uexp,
+            lp, up;
 
         if (![a isKindOfClass:[CPArray class]])
             [CPException raise:CPInvalidArgumentException reason:@"BETWEEN operator requires array argument"];
@@ -512,17 +545,17 @@ function(newValue)\
 
 - (CPExpression) parseSimpleExpression
 {
-    var _identifier;
-    var location;
-    var ident;
-    var dbl;
+    var identifier,
+        location,
+        ident,
+        dbl;
 
     if ([self scanDouble:REFERENCE(dbl)])
         return [CPExpression expressionForConstantValue:[CPNumber numberWithDouble:dbl]];
 
     // FIXME: handle integer, hex constants, 0x 0o 0b
     if ([self scanString:@"-" intoString:NULL])
-    return [CPExpression expressionForFunction:@"chs" arguments:[CPArray arrayWithObject:[self parseExpression]]];
+        return [CPExpression expressionForFunction:@"chs" arguments:[CPArray arrayWithObject:[self parseExpression]]];
 
     if ([self scanString:@"(" intoString:NULL])
     {
@@ -645,8 +678,8 @@ function(newValue)\
 
     if ([self scanString:@"\"" intoString:NULL])
     {
-        var skip = [self charactersToBeSkipped];
-        var str;
+        var skip = [self charactersToBeSkipped],
+            str;
 
         [self setCharactersToBeSkipped:nil];
         if ([self scanUpToString:@"\"" intoString:REFERENCE(str)] == NO)
@@ -662,8 +695,8 @@ function(newValue)\
     }
     if ([self scanString:@"'" intoString:NULL])
     {
-        var skip = [self charactersToBeSkipped];
-        var str;
+        var skip = [self charactersToBeSkipped],
+            str;
 
         [self setCharactersToBeSkipped:nil];
         if ([self scanUpToString:@"'" intoString:REFERENCE(str)] == NO)
@@ -689,12 +722,10 @@ function(newValue)\
     }
 
     [self scanString:@"#" intoString:NULL];
-    if (!_identifier)
-    {
-        _identifier = [CPCharacterSet characterSetWithCharactersInString:@"_$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"];
-    }
+    if (!identifier)
+        identifier = [CPCharacterSet characterSetWithCharactersInString:@"_$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"];
 
-    if (![self scanCharactersFromSet:_identifier intoString:REFERENCE(ident)])
+    if (![self scanCharactersFromSet:identifier intoString:REFERENCE(ident)])
         [CPException raise:CPInvalidArgumentException reason:@"Missing identifier: "+[[self string] substringFromIndex:[self scanLocation]]];
 
     return [CPExpression expressionForKeyPath:ident];
@@ -759,14 +790,13 @@ function(newValue)\
             // to be properly recognized
             // and even %K.((%K)) if the first %K evaluates to "a" and the
             // second %K to "b.c"
-            var right;
 
             if (![left keyPath])
                 [CPException raise:CPInvalidArgumentException reason:@"Invalid left keypath:" + left];
 
-            right = [self parseExpression];
+            var right = [self parseExpression];
             if (![right keyPath])
-                [CPException raise:CPInvalidArgumentException reason:@"Invalid right keypath:" + left];
+                [CPException raise:CPInvalidArgumentException reason:@"Invalid right keypath:" + right];
 
             // concatenate
             left = [CPExpression expressionForKeyPath:[left keyPath]+ "." + [right keyPath]];

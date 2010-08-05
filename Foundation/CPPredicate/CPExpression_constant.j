@@ -11,12 +11,14 @@
 {
     [super initWithExpressionType:CPConstantValueExpressionType];
     _value = value;
+    
     return self;
 }
 
 - (id)initWithCoder:(CPCoder)coder
 {
     var value = [coder decodeObjectForKey:@"CPExpressionConstantValue"];
+    
     return [self initWithValue:value];
 }
 
@@ -54,9 +56,9 @@
 - (CPString)description
 {
     if ([_value isKindOfClass:[CPString class]])
-        return [CPString stringWithFormat:@"\"%s\"",_value];
-    else
-        return [_value description];
+        return @"\"" + _value + @"\"";
+
+    return [_value description];
 }
 
 @end
