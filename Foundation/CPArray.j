@@ -1331,7 +1331,7 @@ CPEnumerationReverse    = 1 << 1;
 */
 - (void)sortUsingFunction:(Function)aFunction context:(id)aContext
 {
-    var h, i, j, k, l, m, n = [self count];
+    var h, i, j, k, l, m, n = [self count], o;
     var A, B = [];
 
     for (h = 1; h < n; h += h)
@@ -1348,7 +1348,8 @@ CPEnumerationReverse    = 1 << 1;
             for (i = 0, k = l; k < j && j <= m + h; k++)
             {
                 A = self[j];
-                if (aFunction(A, B[i], aContext) == CPOrderedDescending)
+                o = aFunction(A, B[i], aContext);
+                if (o == CPOrderedDescending || o == CPOrderedSame)
                     self[k] = B[i++];
                 else
                 {
