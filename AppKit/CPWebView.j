@@ -336,7 +336,8 @@ CPWebViewScrollNative                           = 2;
         {
             var win = [self DOMWindow];
 
-            win.document.write(_html);
+            if (win)
+                win.document.write(_html);
 
             window.setTimeout(_loadCallback, 1);
         }, 0);
