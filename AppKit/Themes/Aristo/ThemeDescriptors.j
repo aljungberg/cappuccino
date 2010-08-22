@@ -404,7 +404,7 @@ var themedButtonValues = nil,
     var button = [self button];
 
     [button setTitle:@"OK"];
-    [button setDefaultButton:YES];
+    [button setThemeState:CPThemeStateDefault];
 
     return button;
 }
@@ -1452,7 +1452,7 @@ var themedButtonValues = nil,
     var button = [self button];
 
     [button setTitle:@"OK"];
-    [button setDefaultButton:YES];
+    [button setThemeState:CPThemeStateDefault];
 
     return button;
 }
