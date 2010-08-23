@@ -168,9 +168,6 @@ CPCriticalAlertStyle        = 2;
     [contentView addSubview:_messageLabel];
     [contentView addSubview:_alertImageView];
     [contentView addSubview:_informativeLabel];
-
-    // For reference: does not actually work since this 'view' is not in the hierarchy.
-    // [self setNeedsLayout];
 }
 
 /*!
@@ -222,9 +219,6 @@ CPCriticalAlertStyle        = 2;
 - (void)setAlertStyle:(CPAlertStyle)style
 {
     _alertStyle = style;
-
-    // For reference: does not actually work since this 'view' is not in the hierarchy.
-    // [self setNeedsLayout];
 }
 
 /*!
@@ -242,9 +236,6 @@ CPCriticalAlertStyle        = 2;
 - (void)setMessageText:(CPString)messageText
 {
     [_messageLabel setStringValue:messageText];
-
-    // For reference: does not actually work since this 'view' is not in the hierarchy.
-    // [self setNeedsLayout];
 }
 
 /*!
@@ -305,12 +296,9 @@ CPCriticalAlertStyle        = 2;
         [button setKeyEquivalent:nil];
 
     [_buttons addObject:button];
-
-    // For reference: does not actually work since this 'view' is not in the hierarchy.
-    // [self setNeedsLayout];
 }
 
-- (void)layoutSubviews
+- (void)layoutPanel
 {
     if (!_alertPanel)
         [self _createPanel];
@@ -399,7 +387,6 @@ CPCriticalAlertStyle        = 2;
         [button setFrame:CGRectMake(offsetX, buttonY, width, height)];
         offsetX -= 10;
     }
-
 }
 
 /*!
@@ -409,7 +396,7 @@ CPCriticalAlertStyle        = 2;
 */
 - (void)runModal
 {
-    [self layoutSubviews];
+    [self layoutPanel];
     [CPApp runModalForWindow:_alertPanel];
 }
 
