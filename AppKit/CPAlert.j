@@ -51,7 +51,6 @@ CPInformationalAlertStyle   = 1;
 */
 CPCriticalAlertStyle        = 2;
 
-
 /*!
     @ingroup appkit
 
@@ -88,8 +87,8 @@ CPCriticalAlertStyle        = 2;
     CPArray         _buttons;
 
     id              _delegate;
-
-    BOOL            _isSheet;
+    SEL             _didEndSelector;
+    id              _modalDelegate;
 }
 
 + (CPString)themeClass
@@ -126,7 +125,6 @@ CPCriticalAlertStyle        = 2;
     {
         _buttons = [CPArray array];
         _alertStyle = CPWarningAlertStyle;
-        _isSheet = NO;
         _alertPanel = nil;
         _windowStyle = nil;
 
@@ -148,7 +146,7 @@ CPCriticalAlertStyle        = 2;
 {
     _windowStyle = styleMask;
 
-    [self setTheme:(_windowStyle === CPHUDBackgroundWindowMask) ? [CPTheme defaultHudTheme] : [CPTheme defaultTheme]];
+    [self setTheme:(_windowStyle & CPHUDBackgroundWindowMask) ? [CPTheme defaultHudTheme] : [CPTheme defaultTheme]];
 
     // We'll need to recreate the panel to get the new window style.
     _alertPanel = nil;
@@ -284,7 +282,7 @@ CPCriticalAlertStyle        = 2;
     [button setTitle:title];
     [button setTarget:self];
     [button setTag:_buttonCount];
-    [button setAction:@selector(_notifyDelegate:)];
+    [button setAction:@selector(_dismissAlert:)];
 
     [[_alertPanel contentView] addSubview:button];
 
@@ -403,37 +401,56 @@ CPCriticalAlertStyle        = 2;
 /*!
     Runs the receiver modally as an alert sheet attached to a specified window.
 
-    @param window - The window this sheet should be attached to.
-    @param modalDelegate - The delegate for the modal-dialog session.
-    @param alertDidEndSelector - Message the alert sends to modalDelegate after the user responds but before the sheet is dismissed.
-    @param contextInfo - Contextual data passed to modalDelegate in didEndSelector message.
+    @param window The parent window for the sheet.
+    @param modalDelegate The delegate for the modal-dialog session.
+    @param alertDidEndSelector Message the alert sends to modalDelegate after the sheet is dismissed.
+    @param contextInfo Contextual data passed to modalDelegate in didEndSelector message.
 */
-- (void)beginSheetModalForWindow:(CPWindow)aWindow modalDelegate:(id)aModalDelegate didEndSelector:(SEL)aDidEndSelector contextInfo:(id)aContextInfo
+- (void)beginSheetModalForWindow:(CPWindow)window modalDelegate:(id)modalDelegate didEndSelector:(SEL)alertDidEndSelector contextInfo:(void)contextInfo
 {
-    _isSheet = YES;
-    [self setWindowStyle:CPDocModalWindowMask];
-    [self layoutSubviews];
-    [CPApp beginSheet:_alertPanel
-           modalForWindow:aWindow
-           modalDelegate:aModalDelegate
-           didEndSelector:aDidEndSelector
-           contextInfo:aContextInfo];
+    [self layoutPanel];
+
+    _didEndSelector = alertDidEndSelector;
+    _modalDelegate = modalDelegate;
+
+    [CPApp beginSheet:_alertPanel modalForWindow:window modalDelegate:self didEndSelector:@selector(_alertDidEnd:returnCode:contextInfo:) contextInfo:contextInfo];
+}
+
+/*!
+    Runs the receiver modally as an alert sheet attached to a specified window.
+
+    @param window The parent window for the sheet.
+*/
+- (void)beginSheetModalForWindow:(CPWindow)window
+{
+    [self layoutPanel];
+
+    [CPApp beginSheet:_alertPanel modalForWindow:window modalDelegate:self didEndSelector:@selector(_alertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+}
+
+- (void)_alertDidEnd:(CPWindow)aSheet returnCode:(CPInteger)returnCode contextInfo:(id)contextInfo
+{
+    if ([_delegate respondsToSelector:@selector(alertDidEnd:returnCode:)])
+            [_delegate alertDidEnd:self returnCode:returnCode];
+
+    if (_didEndSelector)
+        objj_msgSend(_modalDelegate, _didEndSelector, self, returnCode, contextInfo);
+
+    _didEndSelector = nil;
+    _modalDelegate = nil;
 }
 
 /* @ignore */
-- (void)_notifyDelegate:(id)button
+- (void)_dismissAlert:(CPButton)button
 {
-    if (_isSheet)
-    {
+    if ([_alertPanel isSheet])
         [CPApp endSheet:_alertPanel returnCode:[button tag]];
-    }
     else
     {
         [CPApp abortModal];
         [_alertPanel close];
 
-        if (_delegate && [_delegate respondsToSelector:@selector(alertDidEnd:returnCode:)])
-            [_delegate alertDidEnd:self returnCode:[button tag]];
+        [self _alertDidEnd:nil returnCode:[button tag] contextInfo:nil];
     }
 }
 
