@@ -234,40 +234,50 @@
 
 - (void)addObject:(id)anObject
 {
-    if (_insert)
-        return _insert(_proxyObject, _insertSEL, anObject, [CPIndexSet indexSetWithIndex:[self count]]);
-    else if (_insertMany)
-        return _insertMany(_proxyObject, _insertManySEL, [anObject], [CPIndexSet indexSetWithIndex:[self count]]);
-
-    var target = [[self _representedObject] copy];
-
-    [target addObject:anObject];
-    [self _setRepresentedObject:target];
+    [self insertObject:anObject atIndex:[self count]];
 }
 
 - (void)addObjectsFromArray:(CPArray)anArray
 {
     if (_insertMany)
         return _insertMany(_proxyObject, _insertManySEL, anArray, [CPIndexSet indexSetWithIndexesInRange:CPMakeRange([self count], [anArray count])]);
-    
+
     var index = 0,
         count = [anArray count];
 
     for (; index < count; ++index)
-        [self addObject:[anArray objectAtIndex:index]];
+        [self insertObject:[anArray objectAtIndex:index] atIndex:index];
 }
 
 - (void)insertObject:(id)anObject atIndex:(unsigned)anIndex
 {
-    if (_insert)
-        return _insert(_proxyObject, _insertSEL, anObject, anIndex);
-    else if (_insertMany)
-        return _insertMany(_proxyObject, _insertManySEL, [anObject], [CPIndexSet indexSetWithIndex:anIndex]);
+    [self insertObjects:[anObject] atIndexes:[CPIndexSet indexSetWithIndex:anIndex]];
+}
 
-    var target = [[self _representedObject] copy];
+- (void)insertObjects:(CPArray)theObjects atIndexes:(CPIndexSet)theIndexes
+{
+    if (_insertMany)
+        _insertMany(_proxyObject, _insertManySEL, theObjects, theIndexes);
+    else if (_insert)
+    {
+        var indexesArray = [];
+        [theIndexes getIndexes:indexesArray maxCount:-1 inIndexRange:nil];
 
-    [target insertObject:anObject atIndex:anIndex];
-    [self _setRepresentedObject:target];
+        for (var index = 0; index < [indexesArray count]; index++)
+        {
+            var objectIndex = [indexesArray objectAtIndex:index],
+                object = [theObjects objectAtIndex:index];
+
+            _insert(_proxyObject, _insertSEL, object, objectIndex);
+        }
+    }
+    else
+    {
+        var target = [[self _representedObject] copy];
+
+        [target insertObjects:theObjects atIndexes:theIndexes];
+        [self _setRepresentedObject:target];
+    }
 }
 
 - (void)removeObject:(id)anObject
