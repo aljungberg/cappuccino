@@ -29,6 +29,14 @@ var CPStringSizeWithFontInWidthCache = {};
 @implementation CPString (CPStringDrawing)
 
 /*!
+    Returns a dictionary with the items "ascender", "descender", "lineHeight"
+*/
++ (CPDictionary)metricsOfFont:(CPFont)aFont
+{
+    return [CPPlatformString metricsOfFont:aFont];
+}
+
+/*!
     Returns the string
 */
 - (CPString)cssString
