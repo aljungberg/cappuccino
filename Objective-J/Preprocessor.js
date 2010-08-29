@@ -84,7 +84,7 @@ Lexer.prototype.pop = function()
     this._index = this._context.pop();
 }
 
-Lexer.prototype.peak = function(shouldSkipWhitespace)
+Lexer.prototype.peek = function(shouldSkipWhitespace)
 {
     if (shouldSkipWhitespace)
     {
@@ -116,14 +116,14 @@ Lexer.prototype.last = function()
     return this._tokens[this._index - 1];
 }
 
-Lexer.prototype.skip_whitespace= function(shouldMoveBackwards)
+Lexer.prototype.skip_whitespace = function(shouldMoveBackwards)
 {
     var token;
 
     if (shouldMoveBackwards)
-        while((token = this.previous()) && TOKEN_WHITESPACE.test(token)) ;
+        while ((token = this.previous()) && TOKEN_WHITESPACE.test(token)) ;
     else
-        while((token = this.next()) && TOKEN_WHITESPACE.test(token)) ;
+        while ((token = this.next()) && TOKEN_WHITESPACE.test(token)) ;
 
     return token;
 }
@@ -187,7 +187,7 @@ var Preprocessor = function(/*String*/ aString, /*CFURL|String*/ aURL, /*unsigne
 
 Preprocessor.prototype.setClassInfo = function(className, superClassName, ivars)
 {
-    this._classLookupTable[className] = {superClassName:superClassName, ivars:ivars};
+    this._classLookupTable[className] = { superClassName:superClassName, ivars:ivars };
 }
 
 Preprocessor.prototype.getClassInfo = function(className)
@@ -318,7 +318,7 @@ Preprocessor.prototype.brackets = function(/*Lexer*/ tokens, /*StringBuffer*/ aS
         {
             var pair = tuples[index];
 
-            CONCAT(selector, pair[1])
+            CONCAT(selector, pair[1]);
             CONCAT(marg_list, ", " + pair[0]);
         }
 
@@ -505,7 +505,7 @@ Preprocessor.prototype.implementation = function(tokens, /*StringBuffer*/ aStrin
     this._currentSelector = "";
 
     // If we reach an open parenthesis, we are declaring a category.
-    if((token = tokens.skip_whitespace()) == TOKEN_OPEN_PARENTHESIS)
+    if ((token = tokens.skip_whitespace()) == TOKEN_OPEN_PARENTHESIS)
     {
         token = tokens.skip_whitespace();
 
@@ -708,10 +708,10 @@ Preprocessor.prototype._import = function(tokens)
 
     if (token === TOKEN_LESS_THAN)
     {
-        while((token = tokens.next()) && token !== TOKEN_GREATER_THAN)
+        while ((token = tokens.next()) && token !== TOKEN_GREATER_THAN)
             URLString += token;
 
-        if(!token)
+        if (!token)
             throw new SyntaxError(this.error_message("*** Unterminated import statement."));
     }
 
@@ -738,7 +738,7 @@ Preprocessor.prototype.method = function(/*Lexer*/ tokens, ivar_names)
 
     ivar_names = ivar_names || {};
 
-    while((token = tokens.skip_whitespace()) && token !== TOKEN_OPEN_BRACE && token !== TOKEN_SEMICOLON)
+    while ((token = tokens.skip_whitespace()) && token !== TOKEN_OPEN_BRACE && token !== TOKEN_SEMICOLON)
     {
         if (token == TOKEN_COLON)
         {
@@ -752,14 +752,14 @@ Preprocessor.prototype.method = function(/*Lexer*/ tokens, ivar_names)
             if (token == TOKEN_OPEN_PARENTHESIS)
             {
                 // Swallow parameter/return type.  Perhaps later we can use this for debugging?
-                while((token = tokens.skip_whitespace()) && token != TOKEN_CLOSE_PARENTHESIS)
+                while ((token = tokens.skip_whitespace()) && token != TOKEN_CLOSE_PARENTHESIS)
                     type += token;
 
                 token = tokens.skip_whitespace();
             }
 
             // Add the type. If it's empty, add null instead.
-            types[parameters.length+1] = type || null;
+            types[parameters.length + 1] = type || null;
 
             // Since this follows a colon, this must be the parameter name.
             parameters[parameters.length] = token;
@@ -772,7 +772,7 @@ Preprocessor.prototype.method = function(/*Lexer*/ tokens, ivar_names)
             var type = "";
 
             // Since :( is handled above, this must be the return type, just swallow it.
-            while((token = tokens.skip_whitespace()) && token != TOKEN_CLOSE_PARENTHESIS)
+            while ((token = tokens.skip_whitespace()) && token != TOKEN_CLOSE_PARENTHESIS)
                 type += token;
 
             // types[0] is the return argument
@@ -816,7 +816,7 @@ Preprocessor.prototype.method = function(/*Lexer*/ tokens, ivar_names)
 
     CONCAT(buffer, "(self, _cmd");
 
-    for(; index < count; ++index)
+    for (; index < count; ++index)
     {
         CONCAT(buffer, ", ");
         CONCAT(buffer, parameters[index]);
@@ -976,7 +976,7 @@ Preprocessor.prototype.preprocess = function(tokens, /*StringBuffer*/ aStringBuf
             var accumulator = "";
 
             // Following the function identifier we can either have an open parenthesis or an identifier:
-            while((token = tokens.next()) && token !== TOKEN_OPEN_PARENTHESIS && !(/^\w/).test(token))
+            while ((token = tokens.next()) && token !== TOKEN_OPEN_PARENTHESIS && !(/^\w/).test(token))
                 accumulator += token;
 
             // If the next token is an open parenthesis, we have a standard function and we don't have to
@@ -1000,14 +1000,14 @@ Preprocessor.prototype.preprocess = function(tokens, /*StringBuffer*/ aStringBuf
                 var functionName = token;
 
                 // Skip everything until the next close parenthesis.
-                while((token = tokens.next()) && token != TOKEN_CLOSE_PARENTHESIS)
+                while ((token = tokens.next()) && token != TOKEN_CLOSE_PARENTHESIS)
                     CONCAT(buffer, token);
 
                 // Don't forget the last token!
                 CONCAT(buffer, token);
 
                 // Skip everything until the next open curly brace.
-                while((token = tokens.next()) && token != TOKEN_OPEN_BRACE)
+                while ((token = tokens.next()) && token != TOKEN_OPEN_BRACE)
                     CONCAT(buffer, token);
 
                 if (tuple)
