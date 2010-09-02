@@ -33,7 +33,6 @@
 @import "CPException.j"
 @import "CPExpression.j"
 @import "CPFormatter.j"
-@import "CPExpression.j"
 @import "CPIndexSet.j"
 @import "CPInvocation.j"
 @import "CPJSONPConnection.j"
@@ -66,6 +65,7 @@
 @import "CPUserSessionManager.j"
 @import "CPValue.j"
 @import "CPValueTransformer.j"
+
 
 /*! @mainpage
     Cappuccino is distributed under the @ref license "GNU LGPL".
