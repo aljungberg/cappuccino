@@ -413,7 +413,7 @@ var themedButtonValues = nil,
             [@"min-size",           CGSizeMake(0.0, CPButtonDefaultHeight)],
             [@"max-size",           CGSizeMake(-1.0, CPButtonDefaultHeight)],
 
-            [@"imageOffset",        CPButtonImageOffset]
+            [@"image-offset",       CPButtonImageOffset]
         ];
 
     [self registerThemeValues:themedButtonValues forView:button];
@@ -874,7 +874,7 @@ var themedButtonValues = nil,
             [@"image",          imageHighlighted,                   CPThemeStateHighlighted],
             [@"image",          imageDisabled,                      CPThemeStateDisabled],
             [@"image",          imageSelectedDisabled,              CPThemeStateSelected | CPThemeStateDisabled],
-            [@"imageOffset",    CPRadioImageOffset],
+            [@"image-offset",   CPRadioImageOffset],
 
             [@"text-color",     [CPColor colorWithCalibratedWhite:79.0 / 255.0 alpha:1.0],  CPThemeStateDisabled],
 
@@ -910,7 +910,7 @@ var themedButtonValues = nil,
             [@"image",          imageHighlighted,                   CPThemeStateHighlighted],
             [@"image",          imageDisabled,                      CPThemeStateDisabled],
             [@"image",          imageSelectedDisabled,              CPThemeStateSelected | CPThemeStateDisabled],
-            [@"imageOffset",    CPCheckBoxImageOffset],
+            [@"image-offset",   CPCheckBoxImageOffset],
 
             [@"text-color",     [CPColor colorWithCalibratedWhite:79.0 / 255.0 alpha:1.0],  CPThemeStateDisabled],
 
@@ -939,7 +939,7 @@ var themedButtonValues = nil,
             [@"image",          mixedImage,             CPButtonStateMixed],
             [@"image",          mixedHighlightedImage,  CPButtonStateMixed | CPThemeStateHighlighted],
             [@"image",          mixedDisabledImage,     CPButtonStateMixed | CPThemeStateDisabled],
-            [@"imageOffset",    CPCheckBoxImageOffset,  CPButtonStateMixed],
+            [@"image-offset",   CPCheckBoxImageOffset,  CPButtonStateMixed],
             [@"max-size",       CGSizeMake(-1.0, -1.0)]
         ];
 
