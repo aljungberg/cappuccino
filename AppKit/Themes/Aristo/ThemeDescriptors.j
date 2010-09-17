@@ -992,7 +992,7 @@ var themedButtonValues = nil,
         rightBezelColor = PatternColor("segmented-control-bezel-right.png", 4.0, 24.0),
         pushedCenterBezelColor = PatternColor("segmented-control-bezel-pushed-center.png", 1.0, 24.0),
         pushedLeftBezelColor = PatternColor("segmented-control-bezel-pushed-left.png", 4.0, 24.0),
-        pushedRightBezelColor = PatternColor("segmented-control-bezel-pushed-right.png", 4.0, 24.0);
+        pushedRightBezelColor = PatternColor("segmented-control-bezel-pushed-right.png", 4.0, 24.0),
         pushedHighlightedCenterBezelColor = PatternColor("segmented-control-bezel-pushed-highlighted-center.png", 1.0, 24.0),
         pushedHighlightedLeftBezelColor = PatternColor("segmented-control-bezel-pushed-highlighted-left.png", 4.0, 24.0),
         pushedHighlightedRightBezelColor = PatternColor("segmented-control-bezel-pushed-highlighted-right.png", 4.0, 24.0);
@@ -1130,7 +1130,7 @@ var themedButtonValues = nil,
         [@"knob-color", knobColor],
         [@"knob-color", knobHighlightedColor,   CPThemeStateHighlighted],
         [@"knob-color", knobDisabledColor,      CPThemeStateDisabled]
-    ]
+    ];
 
     [self registerThemeValues:themedVerticalSliderValues forView:slider];
 
@@ -1151,7 +1151,7 @@ var themedButtonValues = nil,
     var slider = [self makeCircularSlider],
 
         trackColor = PatternColor("slider-circular-bezel.png", 34.0, 34.0),
-        trackDisabledColor = PatternColor("slider-circular-disabled-bezel.png", 34.0, 34.0)
+        trackDisabledColor = PatternColor("slider-circular-disabled-bezel.png", 34.0, 34.0),
         knobColor = PatternColor("slider-circular-knob.png", 5.0, 5.0),
         knobDisabledColor = PatternColor("slider-circular-disabled-knob.png", 5.0, 5.0),
         knobHighlightedColor = knobColor;

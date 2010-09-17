@@ -526,7 +526,7 @@ if (_currentGroup == nil)
 - (unsigned)groupingLevel
 {
     var grouping = _currentGrouping,
-        level = _currentGrouping != nil;
+        level = _currentGrouping ? 1 : 0;
 
     while (grouping = [grouping parent])
         ++level;
@@ -740,13 +740,13 @@ if (_currentGroup == nil)
 @end
 
 var CPUndoManagerRedoStackKey       = @"CPUndoManagerRedoStackKey",
-    CPUndoManagerUndoStackKey       = @"CPUndoManagerUndoStackKey";
+    CPUndoManagerUndoStackKey       = @"CPUndoManagerUndoStackKey",
 
-    CPUndoManagerLevelsOfUndoKey    = @"CPUndoManagerLevelsOfUndoKey";
-    CPUndoManagerActionNameKey      = @"CPUndoManagerActionNameKey";
-    CPUndoManagerCurrentGroupingKey = @"CPUndoManagerCurrentGroupingKey";
+    CPUndoManagerLevelsOfUndoKey    = @"CPUndoManagerLevelsOfUndoKey",
+    CPUndoManagerActionNameKey      = @"CPUndoManagerActionNameKey",
+    CPUndoManagerCurrentGroupingKey = @"CPUndoManagerCurrentGroupingKey",
 
-    CPUndoManagerRunLoopModesKey    = @"CPUndoManagerRunLoopModesKey";
+    CPUndoManagerRunLoopModesKey    = @"CPUndoManagerRunLoopModesKey",
     CPUndoManagerGroupsByEventKey   = @"CPUndoManagerGroupsByEventKey";
 
 @implementation CPUndoManager (CPCoding)
