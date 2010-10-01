@@ -493,7 +493,7 @@ CPSegmentSwitchTrackingMomentary = 2;
 
 - (CPView)createEphemeralSubviewNamed:(CPString)aName
 {
-    if (aName.substring(0, "segment-content".length) == "segment-content")
+    if ([aName hasPrefix:@"segment-content"])
         return [[_CPImageAndTextView alloc] initWithFrame:_CGRectMakeZero()];
 
     return [[CPView alloc] initWithFrame:_CGRectMakeZero()];
@@ -509,9 +509,9 @@ CPSegmentSwitchTrackingMomentary = 2;
     themeState |= _themeState & CPThemeStateDisabled;
 
     var leftCapColor = [self valueForThemeAttribute:@"left-segment-bezel-color"
-                                            inState:themeState];
+                                            inState:themeState],
 
-    var leftBezelView = [self layoutEphemeralSubviewNamed:@"left-segment-bezel"
+        leftBezelView = [self layoutEphemeralSubviewNamed:@"left-segment-bezel"
                                                positioned:CPWindowBelow
                           relativeToEphemeralSubviewNamed:nil];
 
@@ -522,37 +522,35 @@ CPSegmentSwitchTrackingMomentary = 2;
     themeState |= _themeState & CPThemeStateDisabled;
 
     var rightCapColor = [self valueForThemeAttribute:@"right-segment-bezel-color"
-                                             inState:themeState];
+                                             inState:themeState],
 
-    var rightBezelView = [self layoutEphemeralSubviewNamed:@"right-segment-bezel"
+        rightBezelView = [self layoutEphemeralSubviewNamed:@"right-segment-bezel"
                                                positioned:CPWindowBelow
                           relativeToEphemeralSubviewNamed:nil];
 
     [rightBezelView setBackgroundColor:rightCapColor];
 
-    for (var i=0, count = _themeStates.length; i<count; i++)
+    for (var i = 0, count = _themeStates.length; i < count; i++)
     {
         var themeState = _themeStates[i];
 
         themeState |= _themeState & CPThemeStateDisabled;
 
         var bezelColor = [self valueForThemeAttribute:@"center-segment-bezel-color"
-                                              inState:themeState];
+                                              inState:themeState],
 
-        var bezelView = [self layoutEphemeralSubviewNamed:"segment-bezel-"+i
+            bezelView = [self layoutEphemeralSubviewNamed:"segment-bezel-" + i
                                                positioned:CPWindowBelow
                           relativeToEphemeralSubviewNamed:nil];
 
         [bezelView setBackgroundColor:bezelColor];
 
 
-        //layout image/title views
-        var segment = _segments[i];
-
-
-        var contentView = [self layoutEphemeralSubviewNamed:@"segment-content-"+i
+        // layout image/title views
+        var segment = _segments[i],
+            contentView = [self layoutEphemeralSubviewNamed:@"segment-content-" + i
                                                  positioned:CPWindowAbove
-                            relativeToEphemeralSubviewNamed:@"segment-bezel-"+i];
+                            relativeToEphemeralSubviewNamed:@"segment-bezel-" + i];
 
         [contentView setText:[segment label]];
         [contentView setImage:[segment image]];
@@ -575,16 +573,16 @@ CPSegmentSwitchTrackingMomentary = 2;
         if (i == count - 1)
             continue;
 
-        var borderState = _themeStates[i] | _themeStates[i+1];
+        var borderState = _themeStates[i] | _themeStates[i + 1];
 
         borderState = (borderState & CPThemeStateSelected & ~CPThemeStateHighlighted) ? CPThemeStateSelected : CPThemeStateNormal;
 
         borderState |= _themeState & CPThemeStateDisabled;
 
         var borderColor = [self valueForThemeAttribute:@"divider-bezel-color"
-                                               inState:borderState];
+                                               inState:borderState],
 
-        var borderView = [self layoutEphemeralSubviewNamed:"divider-bezel-"+i
+            borderView = [self layoutEphemeralSubviewNamed:"divider-bezel-" + i
                                                 positioned:CPWindowBelow
                            relativeToEphemeralSubviewNamed:nil];
 
@@ -635,16 +633,16 @@ CPSegmentSwitchTrackingMomentary = 2;
         return;
     }
 
-    // Update Contorl Size
+    // Update control size
     var frame = [self frame];
 
     [self setFrameSize:CGSizeMake(CGRectGetWidth(frame) + delta, CGRectGetHeight(frame))];
 
-    // Update Segment Width
+    // Update segment width
     [segment setWidth:segmentWidth];
     [segment setFrame:[self frameForSegment:aSegment]];
 
-    // Update Following Segments Widths
+    // Update following segments widths
     var index = aSegment + 1;
 
     for (; index < _segments.length; ++index)
@@ -855,7 +853,7 @@ var CPSegmentedControlSegmentsKey       = "CPSegmentedControlSegmentsKey",
         var difference = MAX(originalWidth - [self frame].size.width, 0.0),
             remainingWidth = FLOOR(difference / _segments.length);
 
-        for (var i=0; i < _segments.length; i++)
+        for (var i = 0; i < _segments.length; i++)
             [self setWidth:[_segments[i] width] + remainingWidth forSegment:i];
 
         [self tileWithChangedSegment:0];
@@ -951,4 +949,3 @@ var CPSegmentItemImageKey       = "CPSegmentItemImageKey",
 }
 
 @end
-
