@@ -386,8 +386,8 @@ var themedButtonValues = nil,
             ],
             PatternIsHorizontal),
 
-        defaultTextColor = [CPColor colorWithCalibratedRed:13.0/255.0 green:51.0/255.0 blue:70.0/255.0 alpha:1.0],
-        defaultDisabledTextColor = [CPColor colorWithCalibratedRed:13.0/255.0 green:51.0/255.0 blue:70.0/255.0 alpha:0.6];
+        defaultTextColor = [CPColor colorWithCalibratedRed:13.0 / 255.0 green:51.0 / 255.0 blue:70.0 / 255.0 alpha:1.0],
+        defaultDisabledTextColor = [CPColor colorWithCalibratedRed:13.0 / 255.0 green:51.0 / 255.0 blue:70.0 / 255.0 alpha:0.6];
 
     themedButtonValues =
         [
@@ -802,13 +802,15 @@ var themedButtonValues = nil,
 
 + (CPTokenField)themedTokenField
 {
-    var tokenfield = [[CPTokenField alloc] initWithFrame:CGRectMake(0.0, 0.0, 60.0, 30.0)]
+    var tokenfield = [[CPTokenField alloc] initWithFrame:CGRectMake(0.0, 0.0, 60.0, 30.0)],
 
         overrides =
         [
-            [@"content-inset", CGInsetMake(7.0, 0.0, 7.0, 6.0)],
+            [@"content-inset", CGInsetMake(7.0, 0.0, 7.0, 0.0)],
             // Placeholder is displayed as regular text, not tokens; requires a different inset.
-            [@"content-inset", CGInsetMake(9.0, 7.0, 5.0, 8.0), CPTextFieldStatePlaceholder],
+            [@"content-inset", CGInsetMake(9.0, 0.0, 5.0, 2.0), CPTextFieldStatePlaceholder],
+            [@"content-inset", CGInsetMake(7.0, 5.0, 7.0, 6.0), CPThemeStateBezeled],
+            [@"content-inset", CGInsetMake(9.0, 7.0, 5.0, 8.0), CPThemeStateBezeled | CPTextFieldStatePlaceholder],
         ];
 
     [self registerThemeValues:overrides forView:tokenfield inherit:themedTextFieldValues];
@@ -1339,9 +1341,9 @@ var themedButtonValues = nil,
         alternatingRowColors = [[CPColor whiteColor], [CPColor colorWithRed:245.0 / 255.0 green:249.0 / 255.0 blue:252.0 / 255.0 alpha:1.0]],
         gridColor = [CPColor colorWithHexString:@"dce0e2"],
         selectionColor = [CPColor colorWithHexString:@"5f83b9"],
-        sourceListSelectionColor = [CPDictionary dictionaryWithObjects: [CGGradientCreateWithColorComponents(CGColorSpaceCreateDeviceRGB(), [89.0/255.0, 153.0/255.0, 209.0/255.0,1.0, 33.0/255.0, 94.0/255.0, 208.0/255.0,1.0], [0,1], 2),
-                                                                          [CPColor colorWithCalibratedRed:(61.0/255.0) green:(123.0/255.0) blue:(218.0/255.0) alpha:1.0],
-                                                                          [CPColor colorWithCalibratedRed:(31.0/255.0) green:(92.0/255.0) blue:(207.0/255.0) alpha:1.0]
+        sourceListSelectionColor = [CPDictionary dictionaryWithObjects: [CGGradientCreateWithColorComponents(CGColorSpaceCreateDeviceRGB(), [89.0 / 255.0, 153.0 / 255.0, 209.0 / 255.0,1.0, 33.0 / 255.0, 94.0 / 255.0, 208.0 / 255.0,1.0], [0,1], 2),
+                                                                          [CPColor colorWithCalibratedRed:(61.0 / 255.0) green:(123.0 / 255.0) blue:(218.0 / 255.0) alpha:1.0],
+                                                                          [CPColor colorWithCalibratedRed:(31.0 / 255.0) green:(92.0 / 255.0) blue:(207.0 / 255.0) alpha:1.0]
                                                                         ]
                                                                forKeys: [CPSourceListGradient, CPSourceListTopLineColor, CPSourceListBottomLineColor]],
 
