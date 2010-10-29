@@ -620,7 +620,7 @@ CPEnumerationReverse    = 1 << 1;
             result = CPOrderedSame;
 
         while (i < count)
-            if((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
+            if ((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
                 return result;
 
         return result;
@@ -1108,7 +1108,7 @@ CPEnumerationReverse    = 1 << 1;
             result = CPOrderedSame;
 
         while (i < count)
-            if((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
+            if ((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
                 return result;
 
         return result;
