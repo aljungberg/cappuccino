@@ -113,7 +113,9 @@ CPEnumerationReverse    = 1 << 1;
 */
 + (id)alloc
 {
-    return [];
+    var result = [];
+    result.isa = [self class];
+    return result;
 }
 
 /*!
@@ -469,7 +471,9 @@ CPEnumerationReverse    = 1 << 1;
     // We don't use an enumerator because they return nil to indicate end of enumeration,
     // but nil may actually be the value we are looking for, so we have to loop over the array.
 
-    var start, stop, increment;
+    var start,
+        stop,
+        increment;
 
     if (opts & CPEnumerationReverse)
     {
@@ -977,38 +981,6 @@ CPEnumerationReverse    = 1 << 1;
     return array;
 }
 
-// Key value coding
-/*!
-    Sets the key-value for each element in the array.
-    @param aValue the value for the coding
-    @param aKey the key for the coding
-*/
-- (void)setValue:(id)aValue forKey:(CPString)aKey
-{
-    var i = 0,
-        count = [self count];
-
-    for (; i < count; ++i)
-        [self[i] setValue:aValue forKey:aKey];
-}
-
-/*!
-    Returns the value for \c aKey from each element in the array.
-    @param aKey the key to return the value for
-    @return an array of containing a value for each element in the array
-*/
-- (CPArray)valueForKey:(CPString)aKey
-{
-    var i = 0,
-        count = [self count],
-        array = [];
-
-    for (; i < count; ++i)
-        array.push([self[i] valueForKey:aKey]);
-
-    return array;
-}
-
 // Copying arrays
 
 /*!
@@ -1100,22 +1072,28 @@ CPEnumerationReverse    = 1 << 1;
 
 - (unsigned)insertObject:(id)anObject inArraySortedByDescriptors:(CPArray)descriptors
 {
-    var count = [descriptors count];
+    var count = [descriptors count],
+        index;
 
-    var index = [self _indexOfObject:anObject sortedByFunction:function(lhs, rhs)
+    if (count)
     {
-        var i = 0,
-            result = CPOrderedSame;
+        index = [self _indexOfObject:anObject sortedByFunction:function(lhs, rhs)
+        {
+            var i = 0,
+                result = CPOrderedSame;
 
-        while (i < count)
-            if ((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
-                return result;
+            while (i < count)
+                if ((result = [descriptors[i++] compareObject:lhs withObject:rhs]) != CPOrderedSame)
+                    return result;
 
-        return result;
-    } context:nil];
+            return result;
+        } context:nil];
 
-    if (index < 0)
-        index = -index - 1;
+        if (index < 0)
+            index = -index - 1;
+    }
+    else
+        index = self.length;
 
     [self insertObject:anObject atIndex:index];
     return index;
@@ -1331,8 +1309,17 @@ CPEnumerationReverse    = 1 << 1;
 */
 - (void)sortUsingFunction:(Function)aFunction context:(id)aContext
 {
-    var h, i, j, k, l, m, n = [self count], o;
-    var A, B = [];
+    var h,
+        i,
+        j,
+        k,
+        l,
+        m,
+        n = [self count],
+        o;
+
+    var A,
+        B = [];
 
     for (h = 1; h < n; h += h)
     {

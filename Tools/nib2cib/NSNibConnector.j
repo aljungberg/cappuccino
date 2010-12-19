@@ -31,13 +31,13 @@ NIB_CONNECTION_EQUIVALENCY_TABLE = {};
 - (id)NS_initWithCoder:(CPCoder)aCoder
 {
     self = [super init];
-    
+
     if (self)
     {
         _source = [aCoder decodeObjectForKey:@"NSSource"];
         _destination = [aCoder decodeObjectForKey:@"NSDestination"];
         _label = [aCoder decodeObjectForKey:@"NSLabel"];
-        
+
         var sourceUID = [_source UID],
             destinationUID = [_destination UID];
 
@@ -55,7 +55,7 @@ NIB_CONNECTION_EQUIVALENCY_TABLE = {};
 
         CPLog.debug(@"Connection: " + [_source description] + " " + [_destination description] + " " + _label);
     }
-    
+
     return self;
 }
 
@@ -105,6 +105,49 @@ NIB_CONNECTION_EQUIVALENCY_TABLE = {};
 - (Class)classForKeyedArchiver
 {
     return [CPCibOutletConnector class];
+}
+
+@end
+
+@implementation CPCibBindingConnector (NSCoding)
+
+- (id)NS_initWithCoder:(CPCoder)aCoder
+{
+    if (self = [super NS_initWithCoder:aCoder])
+    {
+        _binding = [aCoder decodeObjectForKey:@"NSBinding"];
+        _keyPath = [aCoder decodeObjectForKey:@"NSKeyPath"];
+
+        _options = [CPDictionary dictionary];
+        var nsoptions = [aCoder decodeObjectForKey:@"NSOptions"],
+            keyEnum = [nsoptions keyEnumerator],
+            aKey;
+        while (aKey = [keyEnum nextObject])
+        {
+            var CPKey = "CP" + aKey.substring(2);
+            [_options setObject:[nsoptions objectForKey:aKey] forKey:CPKey];
+        }
+
+        CPLog.debug(@"Binding Connector: " + [_binding description] + " to: " + _destination + " " + [_keyPath description] + " " + [_options description]);
+    }
+
+    return self;
+}
+
+@end
+
+@implementation NSNibBindingConnector : CPCibBindingConnector
+{
+}
+
+- (id)initWithCoder:(CPCoder)aCoder
+{
+    return [self NS_initWithCoder:aCoder];
+}
+
+- (Class)classForKeyedArchiver
+{
+    return [CPCibBindingConnector class];
 }
 
 @end
