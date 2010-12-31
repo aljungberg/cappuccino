@@ -58,11 +58,6 @@ CPEnumerationReverse    = 1 << 1;
     return [_array objectAtIndex:_index];
 }
 
-- (int)countByEnumeratingWithState:(id)aState objects:(id)objects count:(id)aCount
-{
-    return [_array countByEnumeratingWithState:aState objects:objects count:aCount];
-}
-
 @end
 
 /* @ignore */
@@ -1358,31 +1353,6 @@ CPEnumerationReverse    = 1 << 1;
 - (void)sortUsingSelector:(SEL)aSelector
 {
     [self sortUsingFunction:selectorCompare context:aSelector];
-}
-
-@end
-
-@implementation CPArray (CPFastEnumeration)
-
-- (int)countByEnumeratingWithState:(id)aState objects:(id)objects count:(id)aCount
-{
-    var count = [self count],
-        index = aState.state;
-
-    if (index >= count)
-        return 0;
-
-    var indexIndex = 0,
-        last = MIN(index + aCount, count);
-
-    aCount = last - index;
-
-    for (; index < last; ++index, ++indexIndex)
-        objects[indexIndex] = [self objectAtIndex:index];
-
-    aState.state = last;
-
-    return aCount;
 }
 
 @end
