@@ -2874,7 +2874,8 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
         return;
 
     _sortDescriptors = newSortDescriptors;
-    [[CPKeyValueBinding getBinding:@"sortDescriptors" forObject:self] reverseSetValueFor:@"sortDescriptors"];
+    var binderClass = [[self class] _binderClassForBinding:@"sortDescriptors"];
+    [[binderClass getBinding:@"sortDescriptors" forObject:self] reverseSetValueFor:@"sortDescriptors"];
 
     if ([_sortDescriptors count] > 0)
     {
@@ -2887,8 +2888,8 @@ CPTableViewFirstColumnOnlyAutoresizingStyle = 5;
         // Find the column that was sorted by looking at the key path it's bound to
         while(columnIndex--)
         {
-            var tableColumn = [tableColumns objectAtIndex:columnIndex];
-                valueBinding = [CPKeyValueBinding infoForBinding:@"value" forObject:tableColumn];
+            var tableColumn = [tableColumns objectAtIndex:columnIndex],
+                valueBinding = [CPBinder infoForBinding:@"value" forObject:tableColumn];
 
             if (!valueBinding)
                 break;
